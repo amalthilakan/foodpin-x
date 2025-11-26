@@ -2,18 +2,19 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS } from '../../src/constants/theme';
+import { useTheme } from '../../src/context/ThemeContext';
 
 export default function TabLayout() {
+    const { colors } = useTheme();
     const insets = useSafeAreaInsets();
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: COLORS.primary,
-                tabBarInactiveTintColor: COLORS.textSecondary,
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.textSecondary,
                 tabBarStyle: {
-                    backgroundColor: COLORS.surface,
-                    borderTopColor: COLORS.border,
+                    backgroundColor: colors.surface,
+                    borderTopColor: colors.border,
                     borderTopWidth: 1,
                     height: 60 + insets.bottom,
                     paddingBottom: insets.bottom > 0 ? insets.bottom : 8,

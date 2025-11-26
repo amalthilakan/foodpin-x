@@ -7,7 +7,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Dimensions, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { SHADOWS, SPACING } from '../../src/constants/theme';
+import { useTheme } from '../../src/context/ThemeContext';
 import { getAuthHeaders } from '../../src/utils/auth';
 
 interface PlaceDetails {
@@ -34,6 +35,7 @@ interface PlaceSuggestion {
 }
 
 export default function Search() {
+    const { colors } = useTheme();
     const mapRef = useRef<MapView>(null);
     const [region, setRegion] = useState<Region | null>(null);
     const [places, setPlaces] = useState<PlaceDetails[]>([]);
@@ -253,28 +255,28 @@ export default function Search() {
                         }}
                         title={place.name}
                         description={place.vicinity}
-                        pinColor={exploreMode ? 'blue' : 'red'}
+                        pinColor={exploreMode ? colors.primary : colors.error}
                         onPress={() => setSelectedPlace(place)}
                     />
                 ))}
             </MapView>
 
             <TouchableOpacity
-                style={styles.exploreButton}
+                style={[styles.exploreButton, { backgroundColor: colors.surface }]}
                 onPress={toggleExploreMode}
             >
-                <Text style={styles.exploreButtonText}>{exploreMode ? 'Exit Explore' : 'Explore Bookmarks'}</Text>
+                <Text style={[styles.exploreButtonText, { color: colors.primary }]}>{exploreMode ? 'Exit Explore' : 'Explore Bookmarks'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-                style={[styles.locationButton, isLocating && styles.locationButtonLoading]}
+                style={[styles.locationButton, isLocating && styles.locationButtonLoading, { backgroundColor: colors.surface }]}
                 onPress={getCurrentLocation}
                 disabled={isLocating}
             >
                 <Ionicons
                     name={isLocating ? "refresh" : "location"}
                     size={24}
-                    color={COLORS.primary}
+                    color={colors.primary}
                 />
             </TouchableOpacity>
 
@@ -282,25 +284,25 @@ export default function Search() {
                 <>
                     <View style={[styles.searchContainer, { top: insets.top + 60 }]}>
                         <TextInput
-                            style={styles.searchInput}
+                            style={[styles.searchInput, { backgroundColor: colors.surface, color: colors.textPrimary }]}
                             placeholder="🔍 Search restaurants"
                             value={search}
                             onChangeText={setSearch}
-                            placeholderTextColor={COLORS.placeholder}
+                            placeholderTextColor={colors.placeholder}
                         />
                     </View>
                     {suggestions.length > 0 && (
-                        <View style={[styles.suggestionsContainer, { top: insets.top + 120 }]}>
+                        <View style={[styles.suggestionsContainer, { top: insets.top + 120, backgroundColor: colors.surface }]}>
                             <FlatList
                                 data={suggestions}
                                 keyExtractor={(item) => item.place_id}
                                 renderItem={({ item }) => (
                                     <TouchableOpacity
-                                        style={styles.suggestionItem}
+                                        style={[styles.suggestionItem, { borderBottomColor: colors.border }]}
                                         onPress={() => handleSuggestionPress(item.place_id)}
                                     >
-                                        <Text style={{ fontWeight: 'bold' }} numberOfLines={1}>{item.description}</Text>
-                                        <Text style={{ color: '#666', fontSize: 12 }} numberOfLines={1}>{item.vicinity}</Text>
+                                        <Text style={{ fontWeight: 'bold', color: colors.textPrimary }} numberOfLines={1}>{item.description}</Text>
+                                        <Text style={{ color: colors.textSecondary, fontSize: 12 }} numberOfLines={1}>{item.vicinity}</Text>
                                     </TouchableOpacity>
                                 )}
                                 keyboardShouldPersistTaps="handled"
@@ -312,20 +314,20 @@ export default function Search() {
 
             {selectedPlace && (
                 <View style={styles.saveBoxContainer}>
-                    <View style={styles.saveBox}>
-                        <Text style={styles.saveBoxTitle}>{selectedPlace.name}</Text>
-                        <Text style={styles.saveBoxText}>{selectedPlace.formatted_address}</Text>
+                    <View style={[styles.saveBox, { backgroundColor: colors.surface }]}>
+                        <Text style={[styles.saveBoxTitle, { color: colors.textPrimary }]}>{selectedPlace.name}</Text>
+                        <Text style={[styles.saveBoxText, { color: colors.textSecondary }]}>{selectedPlace.formatted_address}</Text>
                         {selectedPlace.rating && (
-                            <Text style={styles.saveBoxText}>Rating: {selectedPlace.rating} ⭐</Text>
+                            <Text style={[styles.saveBoxText, { color: colors.textSecondary }]}>Rating: {selectedPlace.rating} ⭐</Text>
                         )}
 
                         {!exploreMode ? (
-                            <TouchableOpacity style={styles.saveButton} onPress={() => saveRestaurant(selectedPlace)}>
-                                <Text style={styles.saveButtonText}>Save to Bookmarks</Text>
+                            <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primary }]} onPress={() => saveRestaurant(selectedPlace)}>
+                                <Text style={[styles.saveButtonText, { color: colors.surface }]}>Save to Bookmarks</Text>
                             </TouchableOpacity>
                         ) : (
-                            <TouchableOpacity style={styles.saveButton} onPress={() => setSelectedPlace(null)}>
-                                <Text style={styles.saveButtonText}>Close</Text>
+                            <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primary }]} onPress={() => setSelectedPlace(null)}>
+                                <Text style={[styles.saveButtonText, { color: colors.surface }]}>Close</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -339,16 +341,16 @@ export default function Search() {
                 onRequestClose={() => setSuccessVisible(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.successContent}>
-                            <FontAwesome name="check-circle" size={60} color={COLORS.primary} />
-                            <Text style={styles.successTitle}>Success!</Text>
-                            <Text style={styles.successMessage}>Restaurant bookmarked successfully</Text>
+                            <FontAwesome name="check-circle" size={60} color={colors.primary} />
+                            <Text style={[styles.successTitle, { color: colors.textPrimary }]}>Success!</Text>
+                            <Text style={[styles.successMessage, { color: colors.textSecondary }]}>Restaurant bookmarked successfully</Text>
                             <TouchableOpacity
-                                style={styles.successButton}
+                                style={[styles.successButton, { backgroundColor: colors.primary }]}
                                 onPress={() => setSuccessVisible(false)}
                             >
-                                <Text style={styles.successButtonText}>OK</Text>
+                                <Text style={[styles.successButtonText, { color: colors.surface }]}>OK</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -361,17 +363,14 @@ export default function Search() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
     },
     map: {
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
     },
     exploreButton: {
-        position: 'absolute',
         bottom: 30,
         left: SPACING.l,
-        backgroundColor: COLORS.surface,
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 30,
@@ -379,15 +378,12 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     exploreButtonText: {
-        color: COLORS.primary,
         fontWeight: 'bold',
         fontSize: 14,
     },
     locationButton: {
-        position: 'absolute',
         bottom: 30,
         right: SPACING.l,
-        backgroundColor: COLORS.surface,
         padding: 14,
         borderRadius: 30,
         ...SHADOWS.medium,
@@ -403,19 +399,16 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     searchInput: {
-        backgroundColor: COLORS.surface,
         paddingVertical: 14,
         paddingHorizontal: 20,
         borderRadius: 30,
         fontSize: 16,
         ...SHADOWS.medium,
-        color: COLORS.textPrimary,
     },
     suggestionsContainer: {
         position: 'absolute',
         left: SPACING.l,
         right: SPACING.l,
-        backgroundColor: COLORS.surface,
         borderRadius: 15,
         ...SHADOWS.medium,
         maxHeight: 250,
@@ -425,7 +418,6 @@ const styles = StyleSheet.create({
     suggestionItem: {
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
     },
     saveBoxContainer: {
         position: 'absolute',
@@ -435,7 +427,6 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     saveBox: {
-        backgroundColor: COLORS.surface,
         padding: 24,
         borderRadius: 20,
         ...SHADOWS.large,
@@ -444,15 +435,12 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 8,
-        color: COLORS.textPrimary,
     },
     saveBoxText: {
         fontSize: 15,
-        color: COLORS.textSecondary,
         marginBottom: 6,
     },
     saveButton: {
-        backgroundColor: COLORS.primary,
         paddingVertical: 14,
         borderRadius: 12,
         alignItems: 'center',
@@ -460,7 +448,6 @@ const styles = StyleSheet.create({
         ...SHADOWS.small,
     },
     saveButtonText: {
-        color: COLORS.surface,
         fontWeight: 'bold',
         fontSize: 16,
     },
@@ -472,7 +459,6 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     modalContent: {
-        backgroundColor: COLORS.surface,
         borderRadius: 20,
         padding: SPACING.l,
         width: '100%',
@@ -486,18 +472,15 @@ const styles = StyleSheet.create({
     successTitle: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginTop: SPACING.m,
         marginBottom: SPACING.s,
     },
     successMessage: {
         fontSize: 16,
-        color: COLORS.textSecondary,
         textAlign: 'center',
         marginBottom: SPACING.l,
     },
     successButton: {
-        backgroundColor: COLORS.primary,
         paddingVertical: SPACING.m,
         paddingHorizontal: SPACING.xl,
         borderRadius: 25,
@@ -505,7 +488,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     successButtonText: {
-        color: COLORS.surface,
         fontSize: 16,
         fontWeight: 'bold',
     },
