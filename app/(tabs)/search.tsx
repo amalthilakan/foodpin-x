@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as Location from 'expo-location';
 import { useFocusEffect, useRouter } from 'expo-router';
 import debounce from 'lodash.debounce';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
@@ -43,12 +43,22 @@ export default function Search() {
     const [exploreMode, setExploreMode] = useState(false);
     const [bookmarks, setBookmarks] = useState<PlaceDetails[]>([]);
     const [isLocating, setIsLocating] = useState(false);
+    const [successVisible, setSuccessVisible] = useState(false);
     const router = useRouter();
     const insets = useSafeAreaInsets();
 
     useEffect(() => {
         getCurrentLocation();
     }, []);
+
+    useEffect(() => {
+        if (successVisible) {
+            const timer = setTimeout(() => {
+                setSuccessVisible(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [successVisible]);
 
     useFocusEffect(
         useCallback(() => {
@@ -199,7 +209,7 @@ export default function Search() {
                 },
                 rating: place.rating,
             }, headers);
-            Alert.alert('Success', 'Restaurant bookmarked!');
+            setSuccessVisible(true);
             setSelectedPlace(null);
             // Optionally navigate to Home or just stay here
         } catch (error: any) {
@@ -321,6 +331,29 @@ export default function Search() {
                     </View>
                 </View>
             )}
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={successVisible}
+                onRequestClose={() => setSuccessVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.successContent}>
+                            <FontAwesome name="check-circle" size={60} color={COLORS.primary} />
+                            <Text style={styles.successTitle}>Success!</Text>
+                            <Text style={styles.successMessage}>Restaurant bookmarked successfully</Text>
+                            <TouchableOpacity
+                                style={styles.successButton}
+                                onPress={() => setSuccessVisible(false)}
+                            >
+                                <Text style={styles.successButtonText}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -430,5 +463,50 @@ const styles = StyleSheet.create({
         color: COLORS.surface,
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: SPACING.l,
+    },
+    modalContent: {
+        backgroundColor: COLORS.surface,
+        borderRadius: 20,
+        padding: SPACING.l,
+        width: '100%',
+        maxWidth: 340,
+        ...SHADOWS.large,
+    },
+    successContent: {
+        alignItems: 'center',
+        padding: SPACING.m,
+    },
+    successTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: COLORS.textPrimary,
+        marginTop: SPACING.m,
+        marginBottom: SPACING.s,
+    },
+    successMessage: {
+        fontSize: 16,
+        color: COLORS.textSecondary,
+        textAlign: 'center',
+        marginBottom: SPACING.l,
+    },
+    successButton: {
+        backgroundColor: COLORS.primary,
+        paddingVertical: SPACING.m,
+        paddingHorizontal: SPACING.xl,
+        borderRadius: 25,
+        width: '100%',
+        alignItems: 'center',
+    },
+    successButtonText: {
+        color: COLORS.surface,
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

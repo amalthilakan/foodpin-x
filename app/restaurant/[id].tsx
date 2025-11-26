@@ -2,7 +2,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Linking, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
 import { getAuthHeaders } from '../../src/utils/auth';
@@ -15,6 +15,16 @@ export default function RestaurantDetails() {
     const [notes, setNotes] = useState(initialNotes as string || '');
     const [socialLink, setSocialLink] = useState(initialSocialLink as string || '');
     const [isEditing, setIsEditing] = useState(false);
+    const [successVisible, setSuccessVisible] = useState(false);
+
+    React.useEffect(() => {
+        if (successVisible) {
+            const timer = setTimeout(() => {
+                setSuccessVisible(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [successVisible]);
 
     const handleGetDirections = () => {
         const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
@@ -38,7 +48,7 @@ export default function RestaurantDetails() {
             const headers = await getAuthHeaders();
             await axios.put(`/bookmarks/${id}`, { notes, socialLink }, headers);
             setIsEditing(false);
-            Alert.alert('Success', 'Details saved successfully');
+            setSuccessVisible(true);
         } catch (error) {
             Alert.alert('Error', 'Failed to save details');
         }
@@ -120,6 +130,29 @@ export default function RestaurantDetails() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={successVisible}
+                onRequestClose={() => setSuccessVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.successContent}>
+                            <FontAwesome name="check-circle" size={60} color={COLORS.primary} />
+                            <Text style={styles.successTitle}>Success!</Text>
+                            <Text style={styles.successMessage}>Details saved successfully</Text>
+                            <TouchableOpacity
+                                style={styles.successButton}
+                                onPress={() => setSuccessVisible(false)}
+                            >
+                                <Text style={styles.successButtonText}>OK</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -242,5 +275,50 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginLeft: SPACING.s,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: SPACING.l,
+    },
+    modalContent: {
+        backgroundColor: COLORS.surface,
+        borderRadius: 20,
+        padding: SPACING.l,
+        width: '100%',
+        maxWidth: 340,
+        ...SHADOWS.large,
+    },
+    successContent: {
+        alignItems: 'center',
+        padding: SPACING.m,
+    },
+    successTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: COLORS.textPrimary,
+        marginTop: SPACING.m,
+        marginBottom: SPACING.s,
+    },
+    successMessage: {
+        fontSize: 16,
+        color: COLORS.textSecondary,
+        textAlign: 'center',
+        marginBottom: SPACING.l,
+    },
+    successButton: {
+        backgroundColor: COLORS.primary,
+        paddingVertical: SPACING.m,
+        paddingHorizontal: SPACING.xl,
+        borderRadius: 25,
+        width: '100%',
+        alignItems: 'center',
+    },
+    successButtonText: {
+        color: COLORS.surface,
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
