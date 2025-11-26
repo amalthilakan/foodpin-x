@@ -1,17 +1,20 @@
 import { Stack } from "expo-router";
 import { ErrorBoundary } from "../src/components/ErrorBoundary";
+import { ThemeProvider } from "../src/context/ThemeContext";
 import "../src/utils/axiosConfig";
 
 export default function RootLayout() {
   return (
     <ErrorBoundary>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
+      <ThemeProvider>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
 
-        <Stack.Screen name="signup" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="restaurant/[id]" options={{ headerShown: false }} />
-      </Stack>
+          <Stack.Screen name="signup" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="restaurant/[id]" options={{ headerShown: false }} />
+        </Stack>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

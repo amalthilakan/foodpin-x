@@ -4,10 +4,12 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Linking, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { SHADOWS, SPACING } from '../../src/constants/theme';
+import { useTheme } from '../../src/context/ThemeContext';
 import { getAuthHeaders } from '../../src/utils/auth';
 
 export default function RestaurantDetails() {
+    const { colors } = useTheme();
     const router = useRouter();
     const params = useLocalSearchParams();
     const { id, name, address, rating, latitude, longitude, notes: initialNotes, socialLink: initialSocialLink } = params;
@@ -63,21 +65,21 @@ export default function RestaurantDetails() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <View style={styles.header}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+            <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <FontAwesome name="arrow-left" size={24} color={COLORS.textPrimary} />
+                    <FontAwesome name="arrow-left" size={24} color={colors.textPrimary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Restaurant Details</Text>
+                <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Restaurant Details</Text>
                 <TouchableOpacity onPress={() => isEditing ? handleSave() : setIsEditing(true)} style={styles.editButton}>
-                    <Text style={styles.editButtonText}>{isEditing ? 'Save' : 'Edit'}</Text>
+                    <Text style={[styles.editButtonText, { color: colors.primary }]}>{isEditing ? 'Save' : 'Edit'}</Text>
                 </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: SPACING.xl }}>
-                <View style={styles.card}>
-                    <Text style={styles.title}>{name}</Text>
-                    <Text style={styles.address}>{address}</Text>
+                <View style={[styles.card, { backgroundColor: colors.surface }]}>
+                    <Text style={[styles.title, { color: colors.textPrimary }]}>{name}</Text>
+                    <Text style={[styles.address, { color: colors.textSecondary }]}>{address}</Text>
 
                     {rating && (
                         <View style={styles.ratingContainer}>
@@ -87,46 +89,48 @@ export default function RestaurantDetails() {
                     )}
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Notes</Text>
+                        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Notes</Text>
                         {isEditing ? (
                             <TextInput
-                                style={[styles.input, styles.textArea]}
+                                style={[styles.input, styles.textArea, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
                                 value={notes}
                                 onChangeText={setNotes}
                                 placeholder="Add notes about this place..."
+                                placeholderTextColor={colors.placeholder}
                                 multiline
                                 numberOfLines={4}
                             />
                         ) : (
-                            <Text style={styles.text}>{notes || 'No notes added yet.'}</Text>
+                            <Text style={[styles.text, { color: colors.textSecondary }]}>{notes || 'No notes added yet.'}</Text>
                         )}
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Social Media Link</Text>
+                        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Social Media Link</Text>
                         {isEditing ? (
                             <TextInput
-                                style={styles.input}
+                                style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
                                 value={socialLink}
                                 onChangeText={setSocialLink}
                                 placeholder="https://instagram.com/..."
+                                placeholderTextColor={colors.placeholder}
                                 autoCapitalize="none"
                                 keyboardType="url"
                             />
                         ) : (
                             socialLink ? (
                                 <TouchableOpacity onPress={handleOpenSocialLink}>
-                                    <Text style={styles.link}>{socialLink}</Text>
+                                    <Text style={[styles.link, { color: colors.primary }]}>{socialLink}</Text>
                                 </TouchableOpacity>
                             ) : (
-                                <Text style={styles.text}>No link added yet.</Text>
+                                <Text style={[styles.text, { color: colors.textSecondary }]}>No link added yet.</Text>
                             )
                         )}
                     </View>
 
-                    <TouchableOpacity style={styles.directionButton} onPress={handleGetDirections}>
-                        <FontAwesome name="location-arrow" size={20} color={COLORS.surface} />
-                        <Text style={styles.directionButtonText}>Get Directions</Text>
+                    <TouchableOpacity style={[styles.directionButton, { backgroundColor: colors.primary }]} onPress={handleGetDirections}>
+                        <FontAwesome name="location-arrow" size={20} color={colors.surface} />
+                        <Text style={[styles.directionButtonText, { color: colors.surface }]}>Get Directions</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -138,16 +142,16 @@ export default function RestaurantDetails() {
                 onRequestClose={() => setSuccessVisible(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.successContent}>
-                            <FontAwesome name="check-circle" size={60} color={COLORS.primary} />
-                            <Text style={styles.successTitle}>Success!</Text>
-                            <Text style={styles.successMessage}>Details saved successfully</Text>
+                            <FontAwesome name="check-circle" size={60} color={colors.primary} />
+                            <Text style={[styles.successTitle, { color: colors.textPrimary }]}>Success!</Text>
+                            <Text style={[styles.successMessage, { color: colors.textSecondary }]}>Details saved successfully</Text>
                             <TouchableOpacity
-                                style={styles.successButton}
+                                style={[styles.successButton, { backgroundColor: colors.primary }]}
                                 onPress={() => setSuccessVisible(false)}
                             >
-                                <Text style={styles.successButtonText}>OK</Text>
+                                <Text style={[styles.successButtonText, { color: colors.surface }]}>OK</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -160,7 +164,6 @@ export default function RestaurantDetails() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
     },
     header: {
         flexDirection: 'row',
@@ -168,9 +171,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: SPACING.l,
         paddingVertical: SPACING.m,
-        backgroundColor: COLORS.surface,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
     },
     backButton: {
         padding: SPACING.s,
@@ -178,14 +179,12 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
     },
     editButton: {
         padding: SPACING.s,
     },
     editButtonText: {
         fontSize: 16,
-        color: COLORS.primary,
         fontWeight: 'bold',
     },
     content: {
@@ -193,7 +192,6 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     card: {
-        backgroundColor: COLORS.surface,
         borderRadius: 20,
         padding: SPACING.xl,
         ...SHADOWS.medium,
@@ -202,13 +200,11 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginBottom: SPACING.s,
         textAlign: 'center',
     },
     address: {
         fontSize: 16,
-        color: COLORS.textSecondary,
         marginBottom: SPACING.l,
         textAlign: 'center',
     },
@@ -234,22 +230,17 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginBottom: SPACING.s,
     },
     text: {
         fontSize: 14,
-        color: COLORS.textSecondary,
         lineHeight: 20,
     },
     input: {
-        backgroundColor: COLORS.background,
         borderRadius: 10,
         padding: SPACING.m,
         fontSize: 14,
-        color: COLORS.textPrimary,
         borderWidth: 1,
-        borderColor: COLORS.border,
     },
     textArea: {
         height: 100,
@@ -257,13 +248,11 @@ const styles = StyleSheet.create({
     },
     link: {
         fontSize: 14,
-        color: COLORS.primary,
         textDecorationLine: 'underline',
     },
     directionButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.primary,
         paddingHorizontal: SPACING.xl,
         paddingVertical: SPACING.m,
         borderRadius: 12,
@@ -271,7 +260,6 @@ const styles = StyleSheet.create({
         ...SHADOWS.small,
     },
     directionButtonText: {
-        color: COLORS.surface,
         fontSize: 16,
         fontWeight: 'bold',
         marginLeft: SPACING.s,
@@ -284,7 +272,6 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     modalContent: {
-        backgroundColor: COLORS.surface,
         borderRadius: 20,
         padding: SPACING.l,
         width: '100%',
@@ -298,18 +285,15 @@ const styles = StyleSheet.create({
     successTitle: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginTop: SPACING.m,
         marginBottom: SPACING.s,
     },
     successMessage: {
         fontSize: 16,
-        color: COLORS.textSecondary,
         textAlign: 'center',
         marginBottom: SPACING.l,
     },
     successButton: {
-        backgroundColor: COLORS.primary,
         paddingVertical: SPACING.m,
         paddingHorizontal: SPACING.xl,
         borderRadius: 25,
@@ -317,7 +301,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     successButtonText: {
-        color: COLORS.surface,
         fontSize: 16,
         fontWeight: 'bold',
     },

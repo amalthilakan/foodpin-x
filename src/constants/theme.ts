@@ -1,19 +1,41 @@
-export const COLORS = {
-    primary: '#FF6B35',        // Vibrant Coral Orange
-    secondary: '#FFD23F',      // Bright Golden Yellow
-    accent: '#00D9FF',         // Electric Cyan
-    background: '#F8F9FA',     // Clean Light Gray
-    surface: '#FFFFFF',        // Pure White
-    textPrimary: '#1A1A1A',    // Rich Black
-    textSecondary: '#6B7280',  // Cool Gray
-    success: '#10B981',        // Emerald Green
-    error: '#EF4444',          // Vibrant Red
-    warning: '#F59E0B',        // Amber
-    border: '#E5E7EB',         // Light Border
-    placeholder: '#9CA3AF',    // Medium Gray
-    gradient1: '#FF6B35',      // For gradients
-    gradient2: '#FFD23F',      // For gradients
+export const lightTheme = {
+    primary: '#FF6B35',
+    secondary: '#FFD23F',
+    accent: '#00D9FF',
+    background: '#F8F9FA',
+    surface: '#FFFFFF',
+    textPrimary: '#1A1A1A',
+    textSecondary: '#6B7280',
+    success: '#10B981',
+    error: '#EF4444',
+    warning: '#F59E0B',
+    border: '#E5E7EB',
+    placeholder: '#9CA3AF',
+    gradient1: '#FF6B35',
+    gradient2: '#FFD23F',
+    statusBarStyle: 'dark-content' as const,
 };
+
+export const darkTheme = {
+    primary: '#FF6B35',        // Keep brand color
+    secondary: '#FFD23F',      // Keep brand color
+    accent: '#00D9FF',
+    background: '#121212',     // Dark background
+    surface: '#1E1E1E',        // Dark surface
+    textPrimary: '#FFFFFF',    // White text
+    textSecondary: '#A0A0A0',  // Light gray text
+    success: '#10B981',
+    error: '#EF4444',
+    warning: '#F59E0B',
+    border: '#333333',         // Dark border
+    placeholder: '#666666',    // Darker placeholder
+    gradient1: '#FF6B35',
+    gradient2: '#FFD23F',
+    statusBarStyle: 'light-content' as const,
+};
+
+// Default export for backward compatibility during refactor (points to light theme)
+export const COLORS = lightTheme;
 
 export const SPACING = {
     xs: 4,

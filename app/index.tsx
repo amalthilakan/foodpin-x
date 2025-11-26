@@ -6,9 +6,11 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Button } from '../src/components/Button';
 import { Input } from '../src/components/Input';
-import { COLORS, SPACING } from '../src/constants/theme';
+import { SPACING } from '../src/constants/theme';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function Login() {
+  const { colors } = useTheme();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,10 +52,10 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Animated.View entering={FadeInUp.delay(200).duration(1000).springify()}>
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Login to your account</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Welcome Back</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Login to your account</Text>
       </Animated.View>
 
       <Animated.View style={styles.form} entering={FadeInDown.delay(400).duration(1000).springify()}>
@@ -78,13 +80,13 @@ export default function Login() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
+          <Text style={[styles.footerText, { color: colors.textSecondary }]}>Don't have an account? </Text>
           <Link href="/signup" asChild>
             <Button title="Sign Up" variant="ghost" style={{ width: 'auto', paddingHorizontal: 0, paddingVertical: 0 }} />
           </Link>
         </View>
       </Animated.View>
-    </View>
+    </View >
   );
 }
 
@@ -93,18 +95,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: SPACING.l,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#F8F9FA', // Default fallback, overridden by dynamic style
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.textSecondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
@@ -122,6 +122,5 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 16,
-    color: COLORS.textSecondary,
   },
 });

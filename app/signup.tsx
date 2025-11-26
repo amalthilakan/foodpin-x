@@ -6,9 +6,11 @@ import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Button } from '../src/components/Button';
 import { Input } from '../src/components/Input';
-import { COLORS, SHADOWS, SPACING } from '../src/constants/theme';
+import { SHADOWS, SPACING } from '../src/constants/theme';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function Signup() {
+    const { colors } = useTheme();
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -81,11 +83,11 @@ export default function Signup() {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
             <View style={styles.container}>
                 <Animated.View entering={FadeInUp.delay(200).duration(1000).springify()}>
-                    <Text style={styles.title}>Create Account</Text>
-                    <Text style={styles.subtitle}>Sign up to get started</Text>
+                    <Text style={[styles.title, { color: colors.textPrimary }]}>Create Account</Text>
+                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Sign up to get started</Text>
                 </Animated.View>
 
                 <Animated.View style={styles.form} entering={FadeInDown.delay(400).duration(1000).springify()}>
@@ -127,7 +129,7 @@ export default function Signup() {
                     </View>
 
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>Already have an account? </Text>
+                        <Text style={[styles.footerText, { color: colors.textSecondary }]}>Already have an account? </Text>
                         <Link href="/" asChild>
                             <Button title="Login" variant="ghost" style={{ width: 'auto', paddingHorizontal: 0, paddingVertical: 0 }} />
                         </Link>
@@ -142,18 +144,18 @@ export default function Signup() {
                 onRequestClose={handleModalClose}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.modalHeader}>
                             <FontAwesome
                                 name={modalType === 'success' ? 'check-circle' : 'exclamation-circle'}
                                 size={50}
-                                color={modalType === 'success' ? COLORS.primary : COLORS.error}
+                                color={modalType === 'success' ? colors.primary : colors.error}
                             />
                         </View>
-                        <Text style={styles.modalTitle}>{modalTitle}</Text>
-                        <Text style={styles.modalMessage}>{modalMessage}</Text>
+                        <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>{modalTitle}</Text>
+                        <Text style={[styles.modalMessage, { color: colors.textSecondary }]}>{modalMessage}</Text>
                         <TouchableOpacity
-                            style={[styles.modalButton, { backgroundColor: modalType === 'success' ? COLORS.primary : COLORS.error }]}
+                            style={[styles.modalButton, { backgroundColor: modalType === 'success' ? colors.primary : colors.error }]}
                             onPress={handleModalClose}
                         >
                             <Text style={styles.modalButtonText}>
@@ -170,7 +172,6 @@ export default function Signup() {
 const styles = StyleSheet.create({
     scrollContainer: {
         flexGrow: 1,
-        backgroundColor: COLORS.background,
     },
     container: {
         flex: 1,
@@ -181,12 +182,10 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: 'bold',
         textAlign: 'center',
-        color: COLORS.textPrimary,
         marginBottom: SPACING.xs,
     },
     subtitle: {
         fontSize: 16,
-        color: COLORS.textSecondary,
         textAlign: 'center',
         marginBottom: SPACING.xl,
     },
@@ -205,7 +204,6 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: 16,
-        color: COLORS.textSecondary,
     },
     modalOverlay: {
         flex: 1,
@@ -215,7 +213,6 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     modalContent: {
-        backgroundColor: COLORS.surface,
         borderRadius: 20,
         padding: SPACING.xl,
         width: '100%',
@@ -229,13 +226,11 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginBottom: SPACING.s,
         textAlign: 'center',
     },
     modalMessage: {
         fontSize: 16,
-        color: COLORS.textSecondary,
         textAlign: 'center',
         marginBottom: SPACING.xl,
         lineHeight: 22,
@@ -249,7 +244,7 @@ const styles = StyleSheet.create({
         ...SHADOWS.small,
     },
     modalButtonText: {
-        color: COLORS.surface,
+        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: 'bold',
     },

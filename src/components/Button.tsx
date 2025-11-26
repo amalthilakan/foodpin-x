@@ -1,12 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacityProps } from 'react-native';
+import { StyleProp, StyleSheet, Text, TextStyle, TouchableOpacityProps } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { COLORS, SPACING } from '../constants/theme';
+import { SPACING } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface ButtonProps extends TouchableOpacityProps {
     title: string;
     variant?: 'primary' | 'outline' | 'ghost';
     loading?: boolean;
+    textStyle?: StyleProp<TextStyle>;
 }
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(React.Component);
@@ -20,7 +22,8 @@ import { Pressable } from 'react-native';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', style, loading, ...props }) => {
+export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', style, textStyle, loading, ...props }) => {
+    const { colors } = useTheme();
     const scale = useSharedValue(1);
 
     const animatedStyle = useAnimatedStyle(() => {
@@ -38,22 +41,22 @@ export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', styl
     };
 
     const getBackgroundColor = () => {
-        if (props.disabled) return COLORS.placeholder;
+        if (props.disabled) return colors.placeholder;
         switch (variant) {
-            case 'primary': return COLORS.primary;
+            case 'primary': return colors.primary;
             case 'outline': return 'transparent';
             case 'ghost': return 'transparent';
-            default: return COLORS.primary;
+            default: return colors.primary;
         }
     };
 
     const getTextColor = () => {
-        if (props.disabled) return COLORS.surface;
+        if (props.disabled) return colors.surface;
         switch (variant) {
-            case 'primary': return COLORS.surface;
-            case 'outline': return COLORS.primary;
-            case 'ghost': return COLORS.primary;
-            default: return COLORS.surface;
+            case 'primary': return colors.surface;
+            case 'outline': return colors.primary;
+            case 'ghost': return colors.primary;
+            default: return colors.surface;
         }
     };
 
@@ -69,7 +72,7 @@ export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', styl
                 styles.container,
                 {
                     backgroundColor: getBackgroundColor(),
-                    borderColor: COLORS.primary,
+                    borderColor: colors.primary,
                     borderWidth: getBorderWidth(),
                 },
                 animatedStyle,
@@ -77,7 +80,7 @@ export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', styl
             ]}
             {...props}
         >
-            <Text style={[styles.text, { color: getTextColor() }]}>
+            <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
                 {loading ? 'Loading...' : title}
             </Text>
         </AnimatedPressable>

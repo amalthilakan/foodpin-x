@@ -7,7 +7,8 @@ import { Alert, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOp
 import Animated, { FadeInRight, FadeInUp, FadeOutUp, Layout } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
-import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { SHADOWS, SPACING } from '../../src/constants/theme';
+import { useTheme } from '../../src/context/ThemeContext';
 import { getAuthHeaders } from '../../src/utils/auth';
 
 let hasShownWelcome = false;
@@ -17,6 +18,7 @@ export const resetWelcomeToast = () => {
 };
 
 export default function Home() {
+    const { colors, theme } = useTheme();
     const [bookmarks, setBookmarks] = useState<any[]>([]);
     const [user, setUser] = useState<any>(null);
     const [showToast, setShowToast] = useState(false);
@@ -108,7 +110,7 @@ export default function Home() {
         <Animated.View
             entering={FadeInRight.delay(index * 100).springify()}
             layout={Layout.springify()}
-            style={styles.card}
+            style={[styles.card, { backgroundColor: colors.surface }]}
         >
             <TouchableOpacity
                 style={styles.cardContent}
@@ -126,8 +128,8 @@ export default function Home() {
                     }
                 })}
             >
-                <Text style={styles.cardTitle}>{item.name}</Text>
-                <Text style={styles.cardAddress}>{item.address}</Text>
+                <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{item.name}</Text>
+                <Text style={[styles.cardAddress, { color: colors.textSecondary }]}>{item.address}</Text>
                 {item.rating && (
                     <View style={styles.ratingContainer}>
                         <FontAwesome name="star" size={14} color="#f57f17" />
@@ -136,26 +138,28 @@ export default function Home() {
                 )}
             </TouchableOpacity>
             <View style={styles.cardActions}>
-                <TouchableOpacity onPress={() => handleEdit(item)} style={styles.actionButton}>
-                    <FontAwesome name="pencil" size={20} color={COLORS.primary} />
+                <TouchableOpacity onPress={() => handleEdit(item)} style={[styles.actionButton, { backgroundColor: colors.background }]}>
+                    <FontAwesome name="pencil" size={20} color={colors.primary} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleDelete(item._id)} style={styles.actionButton}>
-                    <FontAwesome name="trash" size={20} color={COLORS.error} />
+                <TouchableOpacity onPress={() => handleDelete(item._id)} style={[styles.actionButton, { backgroundColor: colors.background }]}>
+                    <FontAwesome name="trash" size={20} color={colors.error} />
                 </TouchableOpacity>
             </View>
         </Animated.View>
     );
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <View style={styles.header}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+            <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
                 <Image
                     source={require('../../assets/images/foodpinlogo.png')}
                     style={styles.logo}
                     resizeMode="contain"
                 />
                 <Image
-                    source={require('../../assets/images/foodpin-titled.png')}
+                    source={theme === 'dark'
+                        ? require('../../assets/images/foodpin-title-light.png')
+                        : require('../../assets/images/foodpin-titled.png')}
                     style={styles.logoText}
                     resizeMode="contain"
                 />
@@ -165,17 +169,19 @@ export default function Home() {
                 <Animated.View
                     entering={FadeInUp.springify()}
                     exiting={FadeOutUp.springify()}
-                    style={styles.toast}
+                    style={[styles.toast, { backgroundColor: colors.surface }]}
                 >
-                    <Text style={styles.toastText}>Welcome back, {user.username}!</Text>
+                    <Text style={[styles.toastText, { color: colors.primary }]}>
+                        Welcome back, {user.username ? user.username.charAt(0).toUpperCase() + user.username.slice(1) : ''}!
+                    </Text>
                 </Animated.View>
             )}
 
             {bookmarks.length === 0 ? (
                 <View style={styles.emptyContainer}>
-                    <FontAwesome name="bookmark-o" size={64} color={COLORS.placeholder} />
-                    <Text style={styles.emptyText}>No bookmarks yet</Text>
-                    <Text style={styles.emptySubText}>
+                    <FontAwesome name="bookmark-o" size={64} color={colors.placeholder} />
+                    <Text style={[styles.emptyText, { color: colors.textPrimary }]}>No bookmarks yet</Text>
+                    <Text style={[styles.emptySubText, { color: colors.textSecondary }]}>
                         Go to the Search tab to find and save your favorite restaurants!
                     </Text>
                     <Button
@@ -201,41 +207,43 @@ export default function Home() {
                 onRequestClose={() => setModalVisible(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Edit Details</Text>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+                        <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Edit Details</Text>
 
-                        <Text style={styles.label}>Notes</Text>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>Notes</Text>
                         <TextInput
-                            style={[styles.input, styles.textArea]}
+                            style={[styles.input, styles.textArea, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
                             value={editNotes}
                             onChangeText={setEditNotes}
                             placeholder="Add notes..."
+                            placeholderTextColor={colors.placeholder}
                             multiline
                             numberOfLines={4}
                         />
 
-                        <Text style={styles.label}>Social Link</Text>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>Social Link</Text>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
                             value={editSocialLink}
                             onChangeText={setEditSocialLink}
                             placeholder="https://..."
+                            placeholderTextColor={colors.placeholder}
                             autoCapitalize="none"
                             keyboardType="url"
                         />
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
-                                style={[styles.modalButton, styles.cancelButton]}
+                                style={[styles.modalButton, styles.cancelButton, { backgroundColor: colors.background }]}
                                 onPress={() => setModalVisible(false)}
                             >
-                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                                <Text style={[styles.cancelButtonText, { color: colors.textSecondary }]}>Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={[styles.modalButton, styles.saveButton]}
+                                style={[styles.modalButton, styles.saveButton, { backgroundColor: colors.primary }]}
                                 onPress={handleSaveEdit}
                             >
-                                <Text style={styles.saveButtonText}>Save</Text>
+                                <Text style={[styles.saveButtonText, { color: colors.surface }]}>Save</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -248,15 +256,12 @@ export default function Home() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
     },
     header: {
         paddingTop: 0,
         paddingBottom: 0,
         paddingHorizontal: SPACING.l,
-        backgroundColor: COLORS.surface,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
@@ -274,7 +279,6 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     card: {
-        backgroundColor: COLORS.surface,
         borderRadius: 16,
         padding: SPACING.m,
         marginBottom: SPACING.m,
@@ -290,12 +294,10 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginBottom: 4,
     },
     cardAddress: {
         fontSize: 14,
-        color: COLORS.textSecondary,
         marginBottom: SPACING.s,
     },
     ratingContainer: {
@@ -320,7 +322,6 @@ const styles = StyleSheet.create({
     actionButton: {
         padding: 10,
         marginLeft: SPACING.s,
-        backgroundColor: COLORS.background,
         borderRadius: 10,
     },
     emptyContainer: {
@@ -334,11 +335,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: SPACING.l,
         marginBottom: SPACING.s,
-        color: COLORS.textPrimary,
     },
     emptySubText: {
         fontSize: 16,
-        color: COLORS.textSecondary,
         textAlign: 'center',
         lineHeight: 24,
     },
@@ -346,7 +345,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 100,
         alignSelf: 'center',
-        backgroundColor: COLORS.surface,
         paddingHorizontal: SPACING.l,
         paddingVertical: SPACING.m,
         borderRadius: 25,
@@ -354,7 +352,6 @@ const styles = StyleSheet.create({
         ...SHADOWS.medium,
     },
     toastText: {
-        color: COLORS.primary,
         fontWeight: 'bold',
         fontSize: 14,
     },
@@ -366,7 +363,6 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     modalContent: {
-        backgroundColor: COLORS.surface,
         borderRadius: 20,
         padding: SPACING.l,
         width: '100%',
@@ -375,25 +371,20 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginBottom: SPACING.l,
         textAlign: 'center',
     },
     label: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: COLORS.textSecondary,
         marginBottom: SPACING.xs,
         marginTop: SPACING.s,
     },
     input: {
-        backgroundColor: COLORS.background,
         borderRadius: 10,
         padding: SPACING.m,
         fontSize: 14,
-        color: COLORS.textPrimary,
         borderWidth: 1,
-        borderColor: COLORS.border,
     },
     textArea: {
         height: 80,
@@ -411,19 +402,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cancelButton: {
-        backgroundColor: COLORS.background,
         marginRight: SPACING.s,
     },
     saveButton: {
-        backgroundColor: COLORS.primary,
         marginLeft: SPACING.s,
     },
     cancelButtonText: {
-        color: COLORS.textSecondary,
         fontWeight: 'bold',
     },
     saveButtonText: {
-        color: COLORS.surface,
         fontWeight: 'bold',
     },
 });
