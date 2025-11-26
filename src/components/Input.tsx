@@ -1,5 +1,6 @@
-import React from 'react';
-import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { COLORS, SPACING } from '../constants/theme';
 
@@ -8,8 +9,9 @@ interface InputProps extends TextInputProps {
     error?: string;
 }
 
-export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBlur, ...props }) => {
+export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBlur, secureTextEntry, ...props }) => {
     const isFocused = useSharedValue(0);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
@@ -28,6 +30,10 @@ export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBl
         if (onBlur) onBlur(e);
     };
 
+    const togglePasswordVisibility = () => {
+        setIsPasswordVisible(!isPasswordVisible);
+    };
+
     return (
         <View style={styles.container}>
             {label && <Text style={styles.label}>{label}</Text>}
@@ -37,8 +43,18 @@ export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBl
                     placeholderTextColor={COLORS.placeholder}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
+                    secureTextEntry={secureTextEntry && !isPasswordVisible}
                     {...props}
                 />
+                {secureTextEntry && (
+                    <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                        <Ionicons
+                            name={isPasswordVisible ? 'eye-off' : 'eye'}
+                            size={24}
+                            color={COLORS.textSecondary}
+                        />
+                    </TouchableOpacity>
+                )}
             </Animated.View>
             {error && <Text style={styles.error}>{error}</Text>}
         </View>
@@ -67,6 +83,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: COLORS.textPrimary,
         height: '100%',
+        flex: 1, // Ensure input takes available space
+    },
+    eyeIcon: {
+        position: 'absolute',
+        right: SPACING.m,
     },
     error: {
         color: COLORS.error,

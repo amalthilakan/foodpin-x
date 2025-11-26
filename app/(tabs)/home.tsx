@@ -1,4 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
 import { useFocusEffect, useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useCallback, useState } from 'react';
@@ -7,7 +8,7 @@ import Animated, { FadeInRight, FadeInUp, FadeOutUp, Layout } from 'react-native
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
 import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
-import { getBookmarks, removeBookmark, updateBookmark } from '../../src/services/api';
+import { getAuthHeaders } from '../../src/utils/auth';
 
 let hasShownWelcome = false;
 
@@ -58,7 +59,8 @@ export default function Home() {
 
     const fetchBookmarks = async () => {
         try {
-            const response = await getBookmarks();
+            const headers = await getAuthHeaders();
+            const response = await axios.get('/bookmarks', headers);
             setBookmarks(response.data);
         } catch (error) {
             console.error(error);
@@ -67,7 +69,8 @@ export default function Home() {
 
     const handleDelete = async (id: string) => {
         try {
-            await removeBookmark(id);
+            const headers = await getAuthHeaders();
+            await axios.delete(`/bookmarks/${id}`, headers);
             setBookmarks((prev) => prev.filter((b) => b._id !== id));
         } catch (error) {
             Alert.alert('Error', 'Failed to delete bookmark');
@@ -86,7 +89,8 @@ export default function Home() {
 
         try {
             const updatedData = { notes: editNotes, socialLink: editSocialLink };
-            await updateBookmark(editingItem._id, updatedData);
+            const headers = await getAuthHeaders();
+            await axios.put(`/bookmarks/${editingItem._id}`, updatedData, headers);
 
             setBookmarks(prev => prev.map(b =>
                 b._id === editingItem._id ? { ...b, ...updatedData } : b

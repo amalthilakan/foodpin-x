@@ -1,11 +1,12 @@
+import { FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Button } from '../src/components/Button';
 import { Input } from '../src/components/Input';
-import { COLORS, SPACING } from '../src/constants/theme';
-import api from '../src/services/api';
+import { COLORS, SHADOWS, SPACING } from '../src/constants/theme';
 
 export default function Signup() {
     const [email, setEmail] = useState('');
@@ -13,38 +14,66 @@ export default function Signup() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalType, setModalType] = useState<'success' | 'error'>('error');
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalMessage, setModalMessage] = useState('');
     const router = useRouter();
+
+    const showModal = (type: 'success' | 'error', title: string, message: string) => {
+        setModalType(type);
+        setModalTitle(title);
+        setModalMessage(message);
+        setModalVisible(true);
+    };
+
+    const handleModalClose = () => {
+        setModalVisible(false);
+        if (modalType === 'success') {
+            router.replace('/');
+        }
+    };
 
     const handleSignup = async () => {
         if (!email || !username || !password || !confirmPassword) {
-            Alert.alert('Error', 'Please fill in all fields');
+            showModal('error', 'Error', 'Please fill in all fields');
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            Alert.alert('Error', 'Please enter a valid email address');
+            showModal('error', 'Error', 'Please enter a valid email address');
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Error', 'Passwords do not match');
+            showModal('error', 'Error', 'Passwords do not match');
             return;
         }
 
         setLoading(true);
         try {
-            await api.post('/auth/signup', { username, email, password, confirmPassword });
-            Alert.alert('Success', 'Account created successfully! Please login.');
-            router.replace('/');
+            await axios.post('/auth/signup', { username, email, password, confirmPassword });
+            showModal('success', 'Success', 'Account created successfully! Please login.');
         } catch (error: any) {
-            console.error(error);
+            console.error('Signup Error:', error);
+            if (error.response) {
+                console.error('Response Data:', error.response.data);
+                console.error('Response Status:', error.response.status);
+            } else if (error.request) {
+                console.error('No response received:', error.request);
+                showModal('error', 'Network Error', 'Could not connect to the server. Please check your internet connection or server URL.');
+                return;
+            } else {
+                console.error('Error Message:', error.message);
+            }
+
             const message = error.response?.data?.message || 'Signup failed';
             const errors = error.response?.data?.errors;
             if (errors) {
-                Alert.alert('Error', errors.map((e: any) => e.message).join('\n'));
+                showModal('error', 'Error', errors.map((e: any) => e.message).join('\n'));
             } else {
-                Alert.alert('Error', message);
+                showModal('error', 'Error', message);
             }
         } finally {
             setLoading(false);
@@ -105,6 +134,35 @@ export default function Signup() {
                     </View>
                 </Animated.View>
             </View>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={handleModalClose}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <FontAwesome
+                                name={modalType === 'success' ? 'check-circle' : 'exclamation-circle'}
+                                size={50}
+                                color={modalType === 'success' ? COLORS.primary : COLORS.error}
+                            />
+                        </View>
+                        <Text style={styles.modalTitle}>{modalTitle}</Text>
+                        <Text style={styles.modalMessage}>{modalMessage}</Text>
+                        <TouchableOpacity
+                            style={[styles.modalButton, { backgroundColor: modalType === 'success' ? COLORS.primary : COLORS.error }]}
+                            onPress={handleModalClose}
+                        >
+                            <Text style={styles.modalButtonText}>
+                                {modalType === 'success' ? 'Login Now' : 'Try Again'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }
@@ -148,5 +206,51 @@ const styles = StyleSheet.create({
     footerText: {
         fontSize: 16,
         color: COLORS.textSecondary,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: SPACING.l,
+    },
+    modalContent: {
+        backgroundColor: COLORS.surface,
+        borderRadius: 20,
+        padding: SPACING.xl,
+        width: '100%',
+        maxWidth: 340,
+        alignItems: 'center',
+        ...SHADOWS.large,
+    },
+    modalHeader: {
+        marginBottom: SPACING.m,
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: COLORS.textPrimary,
+        marginBottom: SPACING.s,
+        textAlign: 'center',
+    },
+    modalMessage: {
+        fontSize: 16,
+        color: COLORS.textSecondary,
+        textAlign: 'center',
+        marginBottom: SPACING.xl,
+        lineHeight: 22,
+    },
+    modalButton: {
+        paddingVertical: SPACING.m,
+        paddingHorizontal: SPACING.xl,
+        borderRadius: 12,
+        width: '100%',
+        alignItems: 'center',
+        ...SHADOWS.small,
+    },
+    modalButtonText: {
+        color: COLORS.surface,
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
