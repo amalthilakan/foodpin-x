@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Link, useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
@@ -6,7 +7,6 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Button } from '../src/components/Button';
 import { Input } from '../src/components/Input';
 import { COLORS, SPACING } from '../src/constants/theme';
-import api from '../src/services/api';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -33,7 +33,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { username, password });
+      const response = await axios.post('/auth/login', { username, password });
       const { token, user } = response.data;
 
       await SecureStore.setItemAsync('token', token);

@@ -1,4 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -8,7 +9,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
 import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
-import { getProfile, updateProfile } from '../../src/services/api';
+import { getAuthHeaders } from '../../src/utils/auth';
 import { resetWelcomeToast } from './home';
 
 export default function Profile() {
@@ -36,7 +37,8 @@ export default function Profile() {
 
             // Then fetch fresh data from API (including profile picture if not in SecureStore)
             try {
-                const response = await getProfile();
+                const headers = await getAuthHeaders();
+                const response = await axios.get('/users/profile', headers);
                 if (response.data) {
                     setUser(response.data);
                     // Update SecureStore with fresh data, but EXCLUDE profile picture
@@ -44,7 +46,7 @@ export default function Profile() {
                     await SecureStore.setItemAsync('user', JSON.stringify(userToSave));
                 }
             } catch (error) {
-                console.log('Failed to fetch user profile:', error);
+                console.error('Failed to fetch user profile:', error);
             }
         };
         getUser();
@@ -102,7 +104,8 @@ export default function Profile() {
     const handleUpdateProfile = async (base64Image: string) => {
         try {
             const profilePicture = `data:image/jpeg;base64,${base64Image}`;
-            const updatedUser = await updateProfile({ profilePicture });
+            const headers = await getAuthHeaders();
+            const updatedUser = await axios.put('/users/profile', { profilePicture }, headers);
 
             // Update local state with full user data (including image)
             setUser(updatedUser.data);

@@ -1,10 +1,11 @@
 import { FontAwesome } from '@expo/vector-icons';
+import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Linking, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
-import { updateBookmark } from '../../src/services/api';
+import { getAuthHeaders } from '../../src/utils/auth';
 
 export default function RestaurantDetails() {
     const router = useRouter();
@@ -34,7 +35,8 @@ export default function RestaurantDetails() {
 
     const handleSave = async () => {
         try {
-            await updateBookmark(id as string, { notes, socialLink });
+            const headers = await getAuthHeaders();
+            await axios.put(`/bookmarks/${id}`, { notes, socialLink }, headers);
             setIsEditing(false);
             Alert.alert('Success', 'Details saved successfully');
         } catch (error) {

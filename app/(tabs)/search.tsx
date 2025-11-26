@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
 import * as Location from 'expo-location';
 import { useFocusEffect, useRouter } from 'expo-router';
 import debounce from 'lodash.debounce';
@@ -7,7 +8,7 @@ import { Alert, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpac
 import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
-import { addBookmark, getBookmarks, searchPlaces } from '../../src/services/api';
+import { getAuthHeaders } from '../../src/utils/auth';
 
 interface PlaceDetails {
     place_id: string;
@@ -90,7 +91,8 @@ export default function Search() {
 
     const fetchBookmarks = async () => {
         try {
-            const response = await getBookmarks();
+            const headers = await getAuthHeaders();
+            const response = await axios.get('/bookmarks', headers);
             const formatted = response.data.map((b: any) => ({
                 place_id: b.placeId, // Use placeId from backend
                 name: b.name,
@@ -132,12 +134,16 @@ export default function Search() {
         debounce(async (input: string) => {
             if (!region || !input) return;
             try {
-                const response = await searchPlaces(
-                    input,
-                    region.latitude,
-                    region.longitude,
-                    5000
-                );
+                const headers = await getAuthHeaders();
+                const response = await axios.get('/places/search', {
+                    params: {
+                        keyword: input,
+                        latitude: region.latitude,
+                        longitude: region.longitude,
+                        radius: 5000
+                    },
+                    ...headers
+                });
 
                 const results = response.data.results.map((item: any) => ({
                     place_id: item.place_id,
@@ -182,7 +188,8 @@ export default function Search() {
 
     const saveRestaurant = async (place: PlaceDetails) => {
         try {
-            await addBookmark({
+            const headers = await getAuthHeaders();
+            await axios.post('/bookmarks', {
                 placeId: place.place_id,
                 name: place.name,
                 address: place.formatted_address,
@@ -191,7 +198,7 @@ export default function Search() {
                     longitude: place.geometry.location.lng,
                 },
                 rating: place.rating,
-            });
+            }, headers);
             Alert.alert('Success', 'Restaurant bookmarked!');
             setSelectedPlace(null);
             // Optionally navigate to Home or just stay here
