@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { COLORS, SPACING } from '../constants/theme';
+import { SPACING } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface InputProps extends TextInputProps {
     label?: string;
@@ -10,12 +11,13 @@ interface InputProps extends TextInputProps {
 }
 
 export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBlur, secureTextEntry, ...props }) => {
+    const { colors } = useTheme();
     const isFocused = useSharedValue(0);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
-            borderColor: withTiming(isFocused.value ? COLORS.primary : COLORS.border),
+            borderColor: withTiming(isFocused.value ? colors.primary : colors.border),
             borderWidth: withTiming(isFocused.value ? 2 : 1),
         };
     });
@@ -36,11 +38,11 @@ export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBl
 
     return (
         <View style={styles.container}>
-            {label && <Text style={styles.label}>{label}</Text>}
-            <Animated.View style={[styles.inputContainer, animatedStyle]}>
+            {label && <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>}
+            <Animated.View style={[styles.inputContainer, { backgroundColor: colors.surface }, animatedStyle]}>
                 <TextInput
-                    style={[styles.input, style]}
-                    placeholderTextColor={COLORS.placeholder}
+                    style={[styles.input, { color: colors.textPrimary }, style]}
+                    placeholderTextColor={colors.placeholder}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     secureTextEntry={secureTextEntry && !isPasswordVisible}
@@ -51,12 +53,12 @@ export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBl
                         <Ionicons
                             name={isPasswordVisible ? 'eye-off' : 'eye'}
                             size={24}
-                            color={COLORS.textSecondary}
+                            color={colors.textSecondary}
                         />
                     </TouchableOpacity>
                 )}
             </Animated.View>
-            {error && <Text style={styles.error}>{error}</Text>}
+            {error && <Text style={[styles.error, { color: colors.error }]}>{error}</Text>}
         </View>
     );
 };
@@ -68,12 +70,10 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        color: COLORS.textSecondary,
         marginBottom: SPACING.xs,
         fontWeight: '600',
     },
     inputContainer: {
-        backgroundColor: COLORS.surface,
         borderRadius: 15,
         paddingHorizontal: SPACING.m,
         height: 55,
@@ -81,7 +81,6 @@ const styles = StyleSheet.create({
     },
     input: {
         fontSize: 16,
-        color: COLORS.textPrimary,
         height: '100%',
         flex: 1, // Ensure input takes available space
     },
@@ -90,7 +89,6 @@ const styles = StyleSheet.create({
         right: SPACING.m,
     },
     error: {
-        color: COLORS.error,
         fontSize: 12,
         marginTop: SPACING.xs,
     },

@@ -4,15 +4,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Modal, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
-import { COLORS, SHADOWS, SPACING } from '../../src/constants/theme';
+import { SHADOWS, SPACING } from '../../src/constants/theme';
+import { useTheme } from '../../src/context/ThemeContext';
 import { getAuthHeaders } from '../../src/utils/auth';
 import { resetWelcomeToast } from './home';
 
 export default function Profile() {
+    const { colors, theme, toggleTheme } = useTheme();
     const [user, setUser] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [successVisible, setSuccessVisible] = useState(false);
@@ -123,16 +125,16 @@ export default function Profile() {
 
     if (!user) {
         return (
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
                 <View style={styles.loadingContainer}>
-                    <Text style={styles.loadingText}>Loading...</Text>
+                    <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Loading...</Text>
                 </View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <Animated.View
                 entering={FadeInUp.duration(600)}
                 style={styles.header}
@@ -141,37 +143,51 @@ export default function Profile() {
                     {user.profilePicture ? (
                         <Image source={{ uri: user.profilePicture }} style={styles.avatarImage} />
                     ) : (
-                        <View style={styles.avatarPlaceholder}>
-                            <Text style={styles.avatarText}>
+                        <View style={[styles.avatarPlaceholder, { backgroundColor: colors.primary }]}>
+                            <Text style={[styles.avatarText, { color: colors.surface }]}>
                                 {user.username?.charAt(0).toUpperCase() || 'U'}
                             </Text>
                         </View>
                     )}
-                    <View style={styles.editIconContainer}>
-                        <Text style={styles.editIcon}>+</Text>
+                    <View style={[styles.editIconContainer, { backgroundColor: colors.secondary, borderColor: colors.background }]}>
+                        <Text style={[styles.editIcon, { color: colors.surface }]}>+</Text>
                     </View>
                 </TouchableOpacity>
-                <Text style={styles.title}>{user.username || 'User'}</Text>
-                <Text style={styles.subtitle}>{user.email}</Text>
+                <Text style={[styles.title, { color: colors.textPrimary }]}>
+                    {user.username ? user.username.charAt(0).toUpperCase() + user.username.slice(1) : 'User'}
+                </Text>
+                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{user.email}</Text>
             </Animated.View>
 
             <Animated.View
                 entering={FadeInDown.duration(600).delay(200)}
                 style={styles.content}
             >
-                <View style={styles.infoCard}>
+                <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
                     <View style={styles.infoRow}>
-                        <Text style={styles.label}>Member Since</Text>
-                        <Text style={styles.value}>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>Member Since</Text>
+                        <Text style={[styles.value, { color: colors.textPrimary }]}>
                             {user.createdAt
                                 ? new Date(user.createdAt).toLocaleDateString()
                                 : 'N/A'}
                         </Text>
                     </View>
-                    <View style={styles.divider} />
+                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
                     <View style={styles.infoRow}>
-                        <Text style={styles.label}>Email</Text>
-                        <Text style={styles.value}>{user.email}</Text>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>Email</Text>
+                        <Text style={[styles.value, { color: colors.textPrimary }]}>{user.email}</Text>
+                    </View>
+                </View>
+
+                <View style={[styles.infoCard, { backgroundColor: colors.surface, marginBottom: SPACING.xl }]}>
+                    <View style={styles.infoRow}>
+                        <Text style={[styles.label, { color: colors.textSecondary }]}>Dark Mode</Text>
+                        <Switch
+                            value={theme === 'dark'}
+                            onValueChange={toggleTheme}
+                            trackColor={{ false: '#767577', true: colors.primary }}
+                            thumbColor={'#f4f3f4'}
+                        />
                     </View>
                 </View>
 
@@ -179,7 +195,8 @@ export default function Profile() {
                     title="Logout"
                     onPress={handleLogout}
                     variant="outline"
-                    style={styles.logoutButton}
+                    style={[styles.logoutButton, { borderColor: colors.error }]}
+                    textStyle={{ color: colors.error }}
                 />
             </Animated.View>
 
@@ -190,27 +207,27 @@ export default function Profile() {
                 onRequestClose={() => setModalVisible(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Change Profile Picture</Text>
+                            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Change Profile Picture</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                                <FontAwesome name="times" size={20} color={COLORS.textSecondary} />
+                                <FontAwesome name="times" size={20} color={colors.textSecondary} />
                             </TouchableOpacity>
                         </View>
 
                         <View style={styles.modalOptions}>
                             <TouchableOpacity style={styles.optionButton} onPress={handleCamera}>
-                                <View style={styles.optionIconContainer}>
-                                    <FontAwesome name="camera" size={24} color={COLORS.primary} />
+                                <View style={[styles.optionIconContainer, { backgroundColor: colors.background }]}>
+                                    <FontAwesome name="camera" size={24} color={colors.primary} />
                                 </View>
-                                <Text style={styles.optionText}>Camera</Text>
+                                <Text style={[styles.optionText, { color: colors.textPrimary }]}>Camera</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.optionButton} onPress={handleGallery}>
-                                <View style={styles.optionIconContainer}>
-                                    <FontAwesome name="image" size={24} color={COLORS.primary} />
+                                <View style={[styles.optionIconContainer, { backgroundColor: colors.background }]}>
+                                    <FontAwesome name="image" size={24} color={colors.primary} />
                                 </View>
-                                <Text style={styles.optionText}>Gallery</Text>
+                                <Text style={[styles.optionText, { color: colors.textPrimary }]}>Gallery</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -224,16 +241,16 @@ export default function Profile() {
                 onRequestClose={() => setSuccessVisible(false)}
             >
                 <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
                         <View style={styles.successContent}>
-                            <FontAwesome name="check-circle" size={60} color={COLORS.primary} />
-                            <Text style={styles.successTitle}>Success!</Text>
-                            <Text style={styles.successMessage}>Profile picture updated successfully</Text>
+                            <FontAwesome name="check-circle" size={60} color={colors.primary} />
+                            <Text style={[styles.successTitle, { color: colors.textPrimary }]}>Success!</Text>
+                            <Text style={[styles.successMessage, { color: colors.textSecondary }]}>Profile picture updated successfully</Text>
                             <TouchableOpacity
-                                style={styles.successButton}
+                                style={[styles.successButton, { backgroundColor: colors.primary }]}
                                 onPress={() => setSuccessVisible(false)}
                             >
-                                <Text style={styles.successButtonText}>OK</Text>
+                                <Text style={[styles.successButtonText, { color: colors.surface }]}>OK</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -246,7 +263,6 @@ export default function Profile() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
     },
     loadingContainer: {
         flex: 1,
@@ -255,7 +271,6 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         fontSize: 16,
-        color: COLORS.textSecondary,
     },
     header: {
         alignItems: 'center',
@@ -276,30 +291,25 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 50,
-        backgroundColor: COLORS.primary,
         justifyContent: 'center',
         alignItems: 'center',
     },
     avatarText: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: COLORS.surface,
     },
     editIconContainer: {
         position: 'absolute',
         bottom: 0,
         right: 0,
-        backgroundColor: COLORS.secondary,
         width: 30,
         height: 30,
         borderRadius: 15,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: COLORS.background,
     },
     editIcon: {
-        color: COLORS.surface,
         fontWeight: 'bold',
         fontSize: 18,
         marginTop: -2,
@@ -307,22 +317,19 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginBottom: 4,
     },
     subtitle: {
         fontSize: 16,
-        color: COLORS.textSecondary,
     },
     content: {
         flex: 1,
         paddingHorizontal: SPACING.l,
     },
     infoCard: {
-        backgroundColor: COLORS.surface,
         borderRadius: 20,
         padding: SPACING.l,
-        marginBottom: SPACING.xl,
+        marginBottom: SPACING.m,
         ...SHADOWS.small,
     },
     infoRow: {
@@ -333,21 +340,18 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 16,
-        color: COLORS.textSecondary,
         fontWeight: '500',
     },
     value: {
         fontSize: 16,
-        color: COLORS.textPrimary,
         fontWeight: 'bold',
     },
     divider: {
         height: 1,
-        backgroundColor: COLORS.border,
         marginVertical: SPACING.m,
     },
     logoutButton: {
-        borderColor: COLORS.error,
+        borderWidth: 1,
     },
     modalOverlay: {
         flex: 1,
@@ -357,7 +361,6 @@ const styles = StyleSheet.create({
         padding: SPACING.l,
     },
     modalContent: {
-        backgroundColor: COLORS.surface,
         borderRadius: 20,
         padding: SPACING.l,
         width: '100%',
@@ -373,7 +376,6 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
     },
     closeButton: {
         padding: SPACING.xs,
@@ -391,7 +393,6 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: COLORS.background,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: SPACING.s,
@@ -399,7 +400,6 @@ const styles = StyleSheet.create({
     optionText: {
         fontSize: 14,
         fontWeight: '500',
-        color: COLORS.textPrimary,
     },
     successContent: {
         alignItems: 'center',
@@ -408,18 +408,15 @@ const styles = StyleSheet.create({
     successTitle: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: COLORS.textPrimary,
         marginTop: SPACING.m,
         marginBottom: SPACING.s,
     },
     successMessage: {
         fontSize: 16,
-        color: COLORS.textSecondary,
         textAlign: 'center',
         marginBottom: SPACING.l,
     },
     successButton: {
-        backgroundColor: COLORS.primary,
         paddingVertical: SPACING.m,
         paddingHorizontal: SPACING.xl,
         borderRadius: 25,
@@ -427,7 +424,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     successButtonText: {
-        color: COLORS.surface,
         fontSize: 16,
         fontWeight: 'bold',
     },
