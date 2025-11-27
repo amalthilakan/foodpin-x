@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ...config,
     name: "foodpin",
     slug: "foodpin",
-    version: "1.0.2",
+    version: "1.0.3",
     orientation: "portrait",
     icon: "./assets/images/foodpinlogo.png",
     scheme: "foodpin",
@@ -19,8 +19,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     android: {
         adaptiveIcon: {
             backgroundColor: "#E6F4FE",
-            foregroundImage: "./assets/images/foodpinlogo.png",
-            backgroundImage: "./assets/images/android-icon-background.png",
+            foregroundImage: "./assets/images/foreground.png",
+            backgroundImage: "./assets/images/background.png",
             monochromeImage: "./assets/images/android-icon-monochrome.png"
         },
         edgeToEdgeEnabled: true,

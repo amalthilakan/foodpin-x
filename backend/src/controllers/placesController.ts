@@ -11,9 +11,9 @@ export const searchPlaces = async (req: Request, res: Response) => {
         }
 
         // Debug logging
-        console.log('🔍 Search params:', { keyword, latitude, longitude, radius });
-        console.log('🔑 API Key present:', !!process.env.GOOGLE_MAPS_API_KEY);
-        console.log('🔑 API Key (first 10 chars):', process.env.GOOGLE_MAPS_API_KEY?.substring(0, 10));
+        // console.log('🔍 Search params:', { keyword, latitude, longitude, radius });
+        // console.log('🔑 API Key present:', !!process.env.GOOGLE_MAPS_API_KEY);
+        // console.log('🔑 API Key (first 10 chars):', process.env.GOOGLE_MAPS_API_KEY?.substring(0, 10));
 
         const response = await axios.get(
             'https://maps.googleapis.com/maps/api/place/nearbysearch/json',
@@ -28,7 +28,7 @@ export const searchPlaces = async (req: Request, res: Response) => {
             }
         );
 
-        console.log('✅ Google Maps API response status:', response.data.status);
+        // console.log('✅ Google Maps API response status:', response.data.status);
 
         // Check if the request was denied
         if (response.data.status === 'REQUEST_DENIED') {

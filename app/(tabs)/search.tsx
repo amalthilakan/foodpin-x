@@ -369,6 +369,7 @@ const styles = StyleSheet.create({
         height: Dimensions.get('window').height,
     },
     exploreButton: {
+        position: 'absolute',
         bottom: 30,
         left: SPACING.l,
         paddingVertical: 12,
@@ -382,6 +383,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     locationButton: {
+        position: 'absolute',
         bottom: 30,
         right: SPACING.l,
         padding: 14,
