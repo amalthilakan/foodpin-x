@@ -2,9 +2,10 @@ import axios from 'axios';
 import { Link, useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { Button } from '../src/components/Button';
+import { CustomModal } from '../src/components/CustomModal';
 import { Input } from '../src/components/Input';
 import { SPACING } from '../src/constants/theme';
 import { useTheme } from '../src/context/ThemeContext';
@@ -14,6 +15,12 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfig, setModalConfig] = useState<{ title: string; message: string; type: 'success' | 'error' | 'info' }>({
+    title: '',
+    message: '',
+    type: 'info',
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +36,12 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!username || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setModalConfig({
+        title: 'Error',
+        message: 'Please fill in all fields',
+        type: 'error',
+      });
+      setModalVisible(true);
       return;
     }
 
@@ -45,7 +57,12 @@ export default function Login() {
     } catch (error: any) {
       console.error(error);
       const message = error.response?.data?.message || 'Login failed';
-      Alert.alert('Error', message);
+      setModalConfig({
+        title: 'Error',
+        message: message,
+        type: 'error',
+      });
+      setModalVisible(true);
     } finally {
       setLoading(false);
     }
@@ -86,6 +103,14 @@ export default function Login() {
           </Link>
         </View>
       </Animated.View>
+
+      <CustomModal
+        visible={modalVisible}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        onClose={() => setModalVisible(false)}
+      />
     </View >
   );
 }
