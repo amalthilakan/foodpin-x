@@ -1,98 +1,177 @@
-# FoodPin 🍔📍
+<div align="center">
 
-A modern, beautiful restaurant discovery and review application built with React Native and Expo. FoodPin helps you find the best places to eat, view details, and manage your favorite spots with a premium user experience.
+  <img src="./assets/images/foodpinlogo.png" alt="FoodPin Logo" width="120" />
+
+  <p>
+    <strong>A modern, beautiful restaurant discovery and review application.</strong>
+  </p>
+
+  <p>
+    <a href="https://expo.dev/">
+      <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+    </a>
+    <a href="https://reactnative.dev/">
+      <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
+    </a>
+    <a href="https://www.typescriptlang.org/">
+      <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    </a>
+  </p>
+
+  <p>
+    <a href="#-features">Features</a> •
+    <a href="#-tech-stack">Tech Stack</a> •
+    <a href="#-getting-started">Getting Started</a> •
+    <a href="#-screenshots">Screenshots</a> •
+    <a href="#-contributing">Contributing</a>
+  </p>
+
+  <br />
+
+</div>
+
+---
+
+## 📖 Overview
+
+**FoodPin** is a premium mobile application designed to help users discover the best places to eat. With a sleek, glassmorphism-inspired UI and smooth animations, it offers a delightful user experience for finding restaurants, viewing details, and managing favorites.
 
 ## ✨ Features
 
-- **🔐 User Authentication**: Secure Login and Signup functionality with JWT authentication.
-- **🗺️ Interactive Maps**: Integrated Google Maps to visualize restaurant locations.
-- **🔍 Smart Search**: Search for restaurants by name or cuisine with real-time results.
-- **👤 User Profiles**: Manage your profile, view saved restaurants, and update settings.
-- **🎨 Modern UI/UX**:
-  - Sleek, minimalist design with glassmorphism elements.
-  - Smooth animations using `react-native-reanimated`.
-  - **Dark Mode** & **Light Mode** support with dynamic theming.
-- **📱 Responsive**: Optimized for both Android and iOS devices.
+| Feature | Description |
+| :--- | :--- |
+| **🔐 Authentication** | Secure Login and Signup with JWT and secure storage. |
+| **🗺️ Interactive Maps** | Explore restaurants visually using Google Maps integration. |
+| **🔍 Smart Search** | Real-time search by restaurant name or cuisine type. |
+| **👤 User Profiles** | Personalized profile management and saved places. |
+| **🌗 Dark/Light Mode** | Automatic theme switching based on system preferences. |
+| **🎨 Modern UI** | Beautiful animations and a polished, responsive design. |
 
-## 🛠️ Tech Stack
+## 🛠 Tech Stack
 
-- **Framework**: [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/) (SDK 52)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Navigation**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
-- **Styling**: `StyleSheet`, Custom Theme Context
-- **Animations**: [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
-- **Maps**: [React Native Maps](https://github.com/react-native-maps/react-native-maps)
-- **Networking**: [Axios](https://axios-http.com/)
-- **Storage**: [Expo Secure Store](https://docs.expo.dev/versions/latest/sdk/securestore/)
+<details>
+  <summary><strong>Click to view detailed Tech Stack</strong></summary>
+  <br />
+
+  | Category | Technology | Description |
+  | :--- | :--- | :--- |
+  | **Core** | React Native | Cross-platform mobile framework |
+  | **Platform** | Expo (SDK 52) | Development platform and tools |
+  | **Language** | TypeScript | Static type checking |
+  | **Navigation** | Expo Router | File-based routing system |
+  | **Styling** | StyleSheet | Native styling with custom theme context |
+  | **Animations** | Reanimated | High-performance animations |
+  | **Maps** | React Native Maps | Map integration |
+  | **Networking** | Axios | Promise-based HTTP client |
+  | **Storage** | Secure Store | Encrypted local storage |
+
+</details>
 
 ## 🚀 Getting Started
 
-Follow these steps to set up and run the project locally.
+<details>
+  <summary><strong>Installation & Setup Guide</strong></summary>
+  <br />
 
-### Prerequisites
+  ### Prerequisites
+  - [Node.js](https://nodejs.org/) (LTS)
+  - [Expo Go](https://expo.dev/go) on your phone
 
-- [Node.js](https://nodejs.org/) (LTS recommended)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- [Expo Go](https://expo.dev/go) app on your mobile device (or an Android Emulator / iOS Simulator)
+  ### 1. Clone the repository
+  ```bash
+  git clone https://github.com/yourusername/foodpin.git
+  cd foodpin
+  ```
 
-### Installation
+  ### 2. Install dependencies
+  ```bash
+  npm install
+  ```
 
-1.  **Clone the repository**
+  ### 3. Configure Environment
+  Create a `.env` file in the root:
+  ```env
+  EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+  ```
 
-    ```bash
-    git clone https://github.com/yourusername/foodpin.git
-    cd foodpin
-    ```
+  ### 4. Run the App
+  ```bash
+  npx expo start
+  ```
+  Scan the QR code with Expo Go to launch!
 
-2.  **Install dependencies**
+</details>
 
-    ```bash
-    npm install
-    ```
+## 📱 Screenshots
 
-3.  **Environment Setup**
-
-    Create a `.env` file in the root directory and add your Google Maps API Key:
-
-    ```env
-    EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-    ```
-
-### Running the App
-
-Start the development server:
-
-```bash
-npx expo start
-```
-
-- **Scan the QR code** with the Expo Go app (Android) or Camera app (iOS).
-- Press `a` to open in **Android Emulator**.
-- Press `i` to open in **iOS Simulator**.
-- Press `w` to open in **Web Browser**.
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="https://via.placeholder.com/200x400?text=Login+Screen" alt="Login Screen" width="200"/>
+        <br />
+        <em>Login</em>
+      </td>
+      <td align="center">
+        <img src="https://via.placeholder.com/200x400?text=Home+Screen" alt="Home Screen" width="200"/>
+        <br />
+        <em>Home</em>
+      </td>
+      <td align="center">
+        <img src="https://via.placeholder.com/200x400?text=Map+View" alt="Map View" width="200"/>
+        <br />
+        <em>Map Search</em>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="https://via.placeholder.com/200x400?text=Restaurant+Detail" alt="Restaurant Detail" width="200"/>
+        <br />
+        <em>Details</em>
+      </td>
+      <td align="center">
+        <img src="https://via.placeholder.com/200x400?text=Profile" alt="Profile" width="200"/>
+        <br />
+        <em>Profile</em>
+      </td>
+      <td align="center">
+        <img src="https://via.placeholder.com/200x400?text=Dark+Mode" alt="Dark Mode" width="200"/>
+        <br />
+        <em>Dark Mode</em>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ## 📂 Project Structure
 
 ```
 foodpin/
-├── app/                 # Expo Router pages (Screens)
-│   ├── (tabs)/          # Main tab navigation (Home, Search, Profile)
-│   ├── _layout.tsx      # Root layout configuration
-│   └── index.tsx        # Entry point (Login/Welcome)
+├── app/                 # 📱 Screens & Navigation
 ├── src/
-│   ├── components/      # Reusable UI components (Button, Input, etc.)
-│   ├── constants/       # Theme colors and configuration
-│   ├── context/         # React Context (Theme, Auth)
-│   ├── services/        # API service calls
-│   └── utils/           # Helper functions
-├── assets/              # Images and fonts
-└── app.config.ts        # Expo configuration
+│   ├── components/      # 🧩 Reusable UI Components
+│   ├── constants/       # 🎨 Theme & Config
+│   ├── context/         # 🧠 State Management
+│   ├── services/        # 🌐 API Services
+│   └── utils/           # 🛠 Helpers
+└── assets/              # 🖼 Images & Fonts
 ```
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Feel free to submit a Pull Request.
 
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by the FoodPin Team</p>
+  <p>
+    <a href="https://github.com/yourusername/foodpin/stargazers">
+      <img src="https://img.shields.io/github/stars/yourusername/foodpin?style=social" alt="Star this repo" />
+    </a>
+  </p>
+</div>
