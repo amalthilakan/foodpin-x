@@ -104,6 +104,10 @@
 
 ## 📱 Screenshots
 
+<details>
+  <summary><strong>View App Screenshots</strong></summary>
+  <br />
+
 <div align="center">
   <table>
     <tr>
@@ -142,6 +146,8 @@
     </tr>
   </table>
 </div>
+
+</details>
 
 ## 📂 Project Structure
 
