@@ -1,50 +1,98 @@
-# Welcome to your Expo app 👋
+# FoodPin 🍔📍
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern, beautiful restaurant discovery and review application built with React Native and Expo. FoodPin helps you find the best places to eat, view details, and manage your favorite spots with a premium user experience.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+- **🔐 User Authentication**: Secure Login and Signup functionality with JWT authentication.
+- **🗺️ Interactive Maps**: Integrated Google Maps to visualize restaurant locations.
+- **🔍 Smart Search**: Search for restaurants by name or cuisine with real-time results.
+- **👤 User Profiles**: Manage your profile, view saved restaurants, and update settings.
+- **🎨 Modern UI/UX**:
+  - Sleek, minimalist design with glassmorphism elements.
+  - Smooth animations using `react-native-reanimated`.
+  - **Dark Mode** & **Light Mode** support with dynamic theming.
+- **📱 Responsive**: Optimized for both Android and iOS devices.
 
-   ```bash
-   npm install
-   ```
+## 🛠️ Tech Stack
 
-2. Start the app
+- **Framework**: [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/) (SDK 52)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Navigation**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
+- **Styling**: `StyleSheet`, Custom Theme Context
+- **Animations**: [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/)
+- **Maps**: [React Native Maps](https://github.com/react-native-maps/react-native-maps)
+- **Networking**: [Axios](https://axios-http.com/)
+- **Storage**: [Expo Secure Store](https://docs.expo.dev/versions/latest/sdk/securestore/)
 
-   ```bash
-   npx expo start
-   ```
+## 🚀 Getting Started
 
-In the output, you'll find options to open the app in a
+Follow these steps to set up and run the project locally.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Prerequisites
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- [Node.js](https://nodejs.org/) (LTS recommended)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [Expo Go](https://expo.dev/go) app on your mobile device (or an Android Emulator / iOS Simulator)
 
-## Get a fresh project
+### Installation
 
-When you're ready, run:
+1.  **Clone the repository**
+
+    ```bash
+    git clone https://github.com/yourusername/foodpin.git
+    cd foodpin
+    ```
+
+2.  **Install dependencies**
+
+    ```bash
+    npm install
+    ```
+
+3.  **Environment Setup**
+
+    Create a `.env` file in the root directory and add your Google Maps API Key:
+
+    ```env
+    EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+    ```
+
+### Running the App
+
+Start the development server:
 
 ```bash
-npm run reset-project
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- **Scan the QR code** with the Expo Go app (Android) or Camera app (iOS).
+- Press `a` to open in **Android Emulator**.
+- Press `i` to open in **iOS Simulator**.
+- Press `w` to open in **Web Browser**.
 
-## Learn more
+## 📂 Project Structure
 
-To learn more about developing your project with Expo, look at the following resources:
+```
+foodpin/
+├── app/                 # Expo Router pages (Screens)
+│   ├── (tabs)/          # Main tab navigation (Home, Search, Profile)
+│   ├── _layout.tsx      # Root layout configuration
+│   └── index.tsx        # Entry point (Login/Welcome)
+├── src/
+│   ├── components/      # Reusable UI components (Button, Input, etc.)
+│   ├── constants/       # Theme colors and configuration
+│   ├── context/         # React Context (Theme, Auth)
+│   ├── services/        # API service calls
+│   └── utils/           # Helper functions
+├── assets/              # Images and fonts
+└── app.config.ts        # Expo configuration
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🤝 Contributing
 
-## Join the community
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Join our community of developers creating universal apps.
+## 📄 License
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This project is licensed under the MIT License.
