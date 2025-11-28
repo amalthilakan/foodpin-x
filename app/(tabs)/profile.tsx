@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
 import { SHADOWS, SPACING } from '../../src/constants/theme';
@@ -136,7 +136,7 @@ export default function Profile() {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <Animated.View
-                entering={FadeInUp.duration(600)}
+                entering={FadeIn.duration(600)}
                 style={styles.header}
             >
                 <View style={styles.headerTopActions}>
@@ -166,7 +166,7 @@ export default function Profile() {
             </Animated.View>
 
             <Animated.View
-                entering={FadeInDown.duration(600).delay(200)}
+                entering={FadeIn.duration(600)}
                 style={styles.content}
             >
                 <View style={[styles.infoCard, { backgroundColor: colors.surface }]}>
