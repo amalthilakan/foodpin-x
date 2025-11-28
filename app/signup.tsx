@@ -106,6 +106,8 @@ export default function Signup() {
                         value={username}
                         onChangeText={setUsername}
                         autoCapitalize="none"
+                        textContentType="username"
+                        autoComplete="username"
                     />
 
                     <Input
@@ -114,6 +116,8 @@ export default function Signup() {
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
+                        textContentType="password"
+                        autoComplete="password"
                     />
 
                     <Input
@@ -122,6 +126,8 @@ export default function Signup() {
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                         secureTextEntry
+                        textContentType="password"
+                        autoComplete="password"
                     />
 
                     <View style={styles.buttonContainer}>

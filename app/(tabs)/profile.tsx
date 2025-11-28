@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Modal, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
@@ -139,6 +139,12 @@ export default function Profile() {
                 entering={FadeInUp.duration(600)}
                 style={styles.header}
             >
+                <View style={styles.headerTopActions}>
+                    <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsButton}>
+                        <FontAwesome name="cog" size={24} color={colors.textPrimary} />
+                    </TouchableOpacity>
+                </View>
+
                 <TouchableOpacity onPress={handlePickImage} style={styles.avatarContainer}>
                     {user.profilePicture ? (
                         <Image source={{ uri: user.profilePicture }} style={styles.avatarImage} />
@@ -179,17 +185,7 @@ export default function Profile() {
                     </View>
                 </View>
 
-                <View style={[styles.infoCard, { backgroundColor: colors.surface, marginBottom: SPACING.xl }]}>
-                    <View style={styles.infoRow}>
-                        <Text style={[styles.label, { color: colors.textSecondary }]}>Dark Mode</Text>
-                        <Switch
-                            value={theme === 'dark'}
-                            onValueChange={toggleTheme}
-                            trackColor={{ false: '#767577', true: colors.primary }}
-                            thumbColor={'#f4f3f4'}
-                        />
-                    </View>
-                </View>
+
 
                 <Button
                     title="Logout"
@@ -276,6 +272,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: SPACING.xl,
         paddingHorizontal: SPACING.l,
+    },
+    headerTopActions: {
+        position: 'absolute',
+        top: SPACING.m,
+        right: SPACING.l,
+        zIndex: 10,
+    },
+    settingsButton: {
+        padding: SPACING.xs,
     },
     avatarContainer: {
         marginBottom: SPACING.m,

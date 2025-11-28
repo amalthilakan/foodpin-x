@@ -8,9 +8,10 @@ import { useTheme } from '../context/ThemeContext';
 interface InputProps extends TextInputProps {
     label?: string;
     error?: string;
+    hideToggle?: boolean;
 }
 
-export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBlur, secureTextEntry, ...props }) => {
+export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBlur, secureTextEntry, hideToggle, ...props }) => {
     const { colors } = useTheme();
     const isFocused = useSharedValue(0);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -48,7 +49,7 @@ export const Input: React.FC<InputProps> = ({ label, error, style, onFocus, onBl
                     secureTextEntry={secureTextEntry && !isPasswordVisible}
                     {...props}
                 />
-                {secureTextEntry && (
+                {secureTextEntry && !hideToggle && (
                     <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
                         <Ionicons
                             name={isPasswordVisible ? 'eye-off' : 'eye'}

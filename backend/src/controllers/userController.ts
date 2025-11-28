@@ -42,3 +42,19 @@ export const getProfile = async (req: AuthRequest, res: Response, next: NextFunc
         next(error);
     }
 };
+
+export const deleteAccount = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findByIdAndDelete(userId);
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.json({ message: 'User deleted' });
+    } catch (error) {
+        next(error);
+    }
+};

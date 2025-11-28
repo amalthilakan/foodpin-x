@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ...config,
     name: "foodpin",
     slug: "foodpin",
-    version: "1.0.3",
+    version: "1.0.6",
     orientation: "portrait",
     icon: "./assets/images/foodpinlogo.png",
     scheme: "foodpin",
