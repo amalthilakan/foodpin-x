@@ -71,13 +71,13 @@ export default function RestaurantDetails() {
                     <FontAwesome name="arrow-left" size={24} color={colors.textPrimary} />
                 </TouchableOpacity>
                 <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Restaurant Details</Text>
-                <TouchableOpacity onPress={() => isEditing ? handleSave() : setIsEditing(true)} style={styles.editButton}>
-                    <Text style={[styles.editButtonText, { color: colors.primary }]}>{isEditing ? 'Save' : 'Edit'}</Text>
-                </TouchableOpacity>
+                <View style={{ width: 40 }} />
             </View>
 
             <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: SPACING.xl }}>
                 <View style={[styles.card, { backgroundColor: colors.surface }]}>
+
+
                     <Text style={[styles.title, { color: colors.textPrimary }]}>{name}</Text>
                     <Text style={[styles.address, { color: colors.textSecondary }]}>{address}</Text>
 
@@ -128,10 +128,19 @@ export default function RestaurantDetails() {
                         )}
                     </View>
 
-                    <TouchableOpacity style={[styles.directionButton, { backgroundColor: colors.primary }]} onPress={handleGetDirections}>
-                        <FontAwesome name="location-arrow" size={20} color={colors.surface} />
-                        <Text style={[styles.directionButtonText, { color: colors.surface }]}>Get Directions</Text>
-                    </TouchableOpacity>
+                    <View style={styles.buttonRow}>
+                        <TouchableOpacity
+                            onPress={() => isEditing ? handleSave() : setIsEditing(true)}
+                            style={[styles.actionButton, { backgroundColor: colors.background, borderColor: colors.primary, borderWidth: 1, marginRight: SPACING.m }]}
+                        >
+                            <Text style={[styles.actionButtonText, { color: colors.primary }]}>{isEditing ? 'Save' : 'Edit'}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={[styles.directionButton, { backgroundColor: colors.primary }]} onPress={handleGetDirections}>
+                            <FontAwesome name="location-arrow" size={20} color={colors.surface} />
+                            <Text style={[styles.directionButtonText, { color: colors.surface }]}>Get Directions</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </ScrollView>
 
@@ -202,6 +211,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: SPACING.s,
         textAlign: 'center',
+        marginTop: SPACING.m,
     },
     address: {
         fontSize: 16,
@@ -250,13 +260,30 @@ const styles = StyleSheet.create({
         fontSize: 14,
         textDecorationLine: 'underline',
     },
-    directionButton: {
+    buttonRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: SPACING.xl,
+        marginTop: SPACING.m,
+        width: '100%',
+    },
+    actionButton: {
+        padding: SPACING.m,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...SHADOWS.small,
+    },
+    actionButtonText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    directionButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
         paddingVertical: SPACING.m,
         borderRadius: 12,
-        marginTop: SPACING.m,
         ...SHADOWS.small,
     },
     directionButtonText: {
