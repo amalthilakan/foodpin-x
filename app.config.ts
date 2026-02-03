@@ -38,6 +38,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     plugins: [
         "expo-router",
+        "expo-web-browser",
+        [
+            "@react-native-google-signin/google-signin",
+            {
+                webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+                iosUrlScheme: process.env.EXPO_PUBLIC_GOOGLE_IOS_URL_SCHEME || 'com.googleusercontent.apps.YOUR_IOS_CLIENT_ID',
+            }
+        ],
         [
             "expo-splash-screen",
             {
