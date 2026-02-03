@@ -45,3 +45,4 @@ app-example
 .env
 .env.local
 .env.*.local
+backend/src/config/serviceAccountKey.json
