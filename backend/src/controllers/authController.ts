@@ -8,6 +8,11 @@ interface AuthRequest extends Request {
     user?: any;
 }
 
+// Case-insensitive exact match that also tolerates surrounding whitespace,
+// so accounts created before input was trimmed can still log in.
+const looseMatch = (value: string) =>
+    new RegExp(`^\\s*${value.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i');
+
 export const signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const validation = signupSchema.safeParse(req.body);
@@ -16,9 +21,11 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
             return;
         }
 
-        const { username, email, password } = validation.data;
+        const username = validation.data.username.trim();
+        const email = validation.data.email.trim().toLowerCase();
+        const { password } = validation.data;
 
-        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        const existingUser = await User.findOne({ $or: [{ email: looseMatch(email) }, { username: looseMatch(username) }] });
         if (existingUser) {
             res.status(400).json({ message: 'User already exists' });
             return;
@@ -50,15 +57,19 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         }
 
         const { username, password } = validation.data;
+        const identifier = looseMatch(username);
 
-        const user = await User.findOne({ username });
+        // Accept either the username or the email in the login field
+        const user = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] });
         if (!user) {
+            console.warn(`Login failed: no user matching "${username.trim()}"`);
             res.status(400).json({ message: 'invalid username or password' });
             return;
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            console.warn(`Login failed: wrong password for "${user.username}"`);
             res.status(400).json({ message: 'invalid username or password' });
             return;
         }

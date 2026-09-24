@@ -79,8 +79,8 @@ export default function Login() {
 
       <Animated.View style={styles.form} entering={FadeInDown.delay(400).duration(1000).springify()}>
         <Input
-          label="Username"
-          placeholder="Enter your username"
+          label="Username or Email"
+          placeholder="Enter your username or email"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
