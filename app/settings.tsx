@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import * as Storage from '../src/utils/storage';
 import React, { useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,8 +36,8 @@ export default function Settings() {
             const headers = await getAuthHeaders();
             await axios.delete('/users/profile', headers);
 
-            await SecureStore.deleteItemAsync('token');
-            await SecureStore.deleteItemAsync('user');
+            await Storage.deleteItem('token');
+            await Storage.deleteItem('user');
             router.replace('/');
         } catch (error) {
             console.error('Error deleting account:', error);

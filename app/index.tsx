@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Link, useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import * as Storage from '../src/utils/storage';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -25,7 +25,7 @@ export default function Login() {
 
   useEffect(() => {
     const checkLogin = async () => {
-      const token = await SecureStore.getItemAsync('token');
+      const token = await Storage.getItem('token');
       if (token) {
         router.replace('/(tabs)/home');
       }
@@ -49,8 +49,8 @@ export default function Login() {
       const response = await axios.post('/auth/login', { username: username.trim(), password });
       const { token, user } = response.data;
 
-      await SecureStore.setItemAsync('token', token);
-      await SecureStore.setItemAsync('user', JSON.stringify(user));
+      await Storage.setItem('token', token);
+      await Storage.setItem('user', JSON.stringify(user));
 
       router.replace('/(tabs)/home');
     } catch (error: any) {

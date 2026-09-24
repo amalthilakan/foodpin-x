@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import { useFocusEffect, useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import * as Storage from '../../src/utils/storage';
 import React, { useCallback, useState } from 'react';
 import { Alert, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInRight, FadeInUp, FadeOutUp, LinearTransition } from 'react-native-reanimated';
@@ -28,8 +28,8 @@ export default function Home() {
     const router = useRouter();
 
     const checkUser = useCallback(async () => {
-        const token = await SecureStore.getItemAsync('token');
-        const userData = await SecureStore.getItemAsync('user');
+        const token = await Storage.getItem('token');
+        const userData = await Storage.getItem('user');
         if (!token || !userData) {
             router.replace('/');
             return false;

@@ -1,7 +1,7 @@
-import * as SecureStore from 'expo-secure-store';
+import * as Storage from './storage';
 
 export const getAuthHeaders = async () => {
-    const token = await SecureStore.getItemAsync('token');
+    const token = await Storage.getItem('token');
     return {
         headers: {
             'Content-Type': 'application/json',

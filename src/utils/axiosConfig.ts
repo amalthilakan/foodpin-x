@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import * as Storage from './storage';
 import { BASE_URL } from '../constants/config';
 import { resetWelcomeToast } from './welcomeToast';
 
@@ -19,8 +19,8 @@ axios.interceptors.response.use(
         if (error.response?.status === 401 && hadAuthHeader && !isHandlingUnauthorized) {
             isHandlingUnauthorized = true;
             try {
-                await SecureStore.deleteItemAsync('token');
-                await SecureStore.deleteItemAsync('user');
+                await Storage.deleteItem('token');
+                await Storage.deleteItem('user');
                 resetWelcomeToast();
                 router.replace('/');
             } finally {

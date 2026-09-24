@@ -5,7 +5,7 @@ import { useFocusEffect } from 'expo-router';
 import debounce from 'lodash.debounce';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Dimensions, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
+import MapView, { Marker, Region } from '../../src/components/Map';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SHADOWS, SPACING } from '../../src/constants/theme';
 import { useTheme } from '../../src/context/ThemeContext';

@@ -2,7 +2,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import * as Storage from '../../src/utils/storage';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -32,7 +32,7 @@ export default function Profile() {
     useEffect(() => {
         const getUser = async () => {
             // Try to load from SecureStore first for speed
-            const userData = await SecureStore.getItemAsync('user');
+            const userData = await Storage.getItem('user');
             if (userData) {
                 setUser(JSON.parse(userData));
             }
@@ -45,7 +45,7 @@ export default function Profile() {
                     setUser(response.data);
                     // Update SecureStore with fresh data, but EXCLUDE profile picture
                     const { profilePicture: _, ...userToSave } = response.data;
-                    await SecureStore.setItemAsync('user', JSON.stringify(userToSave));
+                    await Storage.setItem('user', JSON.stringify(userToSave));
                 }
             } catch (error) {
                 console.error('Failed to fetch user profile:', error);
@@ -55,8 +55,8 @@ export default function Profile() {
     }, []);
 
     const handleLogout = async () => {
-        await SecureStore.deleteItemAsync('token');
-        await SecureStore.deleteItemAsync('user');
+        await Storage.deleteItem('token');
+        await Storage.deleteItem('user');
         resetWelcomeToast();
         router.replace('/');
     };
@@ -114,7 +114,7 @@ export default function Profile() {
 
             // Update SecureStore EXCLUDING profile picture to avoid size warning
             const { profilePicture: _, ...userToSave } = updatedUser.data;
-            await SecureStore.setItemAsync('user', JSON.stringify(userToSave));
+            await Storage.setItem('user', JSON.stringify(userToSave));
 
             setSuccessVisible(true);
         } catch (error) {
