@@ -24,15 +24,14 @@ export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
+    const checkLogin = async () => {
+      const token = await SecureStore.getItemAsync('token');
+      if (token) {
+        router.replace('/(tabs)/home');
+      }
+    };
     checkLogin();
-  }, []);
-
-  const checkLogin = async () => {
-    const token = await SecureStore.getItemAsync('token');
-    if (token) {
-      router.replace('/(tabs)/home');
-    }
-  };
+  }, [router]);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -47,7 +46,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const response = await axios.post('/auth/login', { username, password });
+      const response = await axios.post('/auth/login', { username: username.trim(), password });
       const { token, user } = response.data;
 
       await SecureStore.setItemAsync('token', token);
@@ -56,7 +55,10 @@ export default function Login() {
       router.replace('/(tabs)/home');
     } catch (error: any) {
       console.error(error);
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.response?.data?.message
+        || (error.request && !error.response
+          ? 'Could not connect to the server. Please check your internet connection or server URL.'
+          : 'Login failed');
       setModalConfig({
         title: 'Error',
         message: message,
@@ -97,7 +99,7 @@ export default function Login() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: colors.textSecondary }]}>Don't have an account? </Text>
+          <Text style={[styles.footerText, { color: colors.textSecondary }]}>Don&apos;t have an account? </Text>
           <Link href="/signup" asChild>
             <Button title="Sign Up" variant="ghost" style={{ width: 'auto', paddingHorizontal: 0, paddingVertical: 0 }} />
           </Link>

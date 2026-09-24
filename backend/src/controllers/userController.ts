@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import Bookmark from '../models/Bookmark';
 import User from '../models/User';
 
 interface AuthRequest extends Request {
@@ -52,6 +53,8 @@ export const deleteAccount = async (req: AuthRequest, res: Response, next: NextF
             res.status(404).json({ message: 'User not found' });
             return;
         }
+
+        await Bookmark.deleteMany({ userId });
 
         res.json({ message: 'User deleted' });
     } catch (error) {

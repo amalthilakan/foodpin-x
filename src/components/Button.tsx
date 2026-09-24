@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleProp, StyleSheet, Text, TextStyle, TouchableOpacityProps } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, TextStyle, TouchableOpacityProps } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SPACING } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
@@ -11,18 +11,9 @@ interface ButtonProps extends TouchableOpacityProps {
     textStyle?: StyleProp<TextStyle>;
 }
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(React.Component);
-
-// Since createAnimatedComponent with TouchableOpacity can be tricky with types and refs, 
-// we'll implement a simple Pressable-like behavior using a View and gesture handlers 
-// or just wrap TouchableOpacity and animate its style.
-// A simpler approach for "scale on press" is to use `useAnimatedStyle`.
-
-import { Pressable } from 'react-native';
-
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', style, textStyle, loading, ...props }) => {
+export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', style, textStyle, loading, disabled, ...props }) => {
     const { colors } = useTheme();
     const scale = useSharedValue(1);
 
@@ -41,7 +32,7 @@ export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', styl
     };
 
     const getBackgroundColor = () => {
-        if (props.disabled) return colors.placeholder;
+        if (disabled) return colors.placeholder;
         switch (variant) {
             case 'primary': return colors.primary;
             case 'outline': return 'transparent';
@@ -51,7 +42,7 @@ export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', styl
     };
 
     const getTextColor = () => {
-        if (props.disabled) return colors.surface;
+        if (disabled) return colors.surface;
         switch (variant) {
             case 'primary': return colors.surface;
             case 'outline': return colors.primary;
@@ -79,6 +70,8 @@ export const Button: React.FC<ButtonProps> = ({ title, variant = 'primary', styl
                 style
             ]}
             {...props}
+            // Prevent duplicate submissions while a request is in flight
+            disabled={disabled || loading}
         >
             <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
                 {loading ? 'Loading...' : title}

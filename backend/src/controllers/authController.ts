@@ -64,7 +64,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', {
-            expiresIn: '1h',
+            expiresIn: '7d',
         });
 
         res.json({ token, user: { id: user._id, username: user.username, email: user.email, createdAt: user.createdAt } });
@@ -80,6 +80,11 @@ export const changePassword = async (req: AuthRequest, res: Response, next: Next
 
         if (!currentPassword || !newPassword) {
             res.status(400).json({ message: 'Please provide current and new password' });
+            return;
+        }
+
+        if (typeof newPassword !== 'string' || newPassword.length < 6) {
+            res.status(400).json({ message: 'Password must be at least 6 characters long' });
             return;
         }
 

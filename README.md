@@ -88,13 +88,32 @@
   npm install
   ```
 
-  ### 3. Configure Environment
-  Create a `.env` file in the root:
+  ### 3. Set up and start the backend
+  Create `backend/.env`:
   ```env
-  EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+  MONGO_URI=mongodb+srv://<user>:<password>@<cluster>/foodpin
+  JWT_SECRET=a_long_random_string
+  GOOGLE_MAPS_API_KEY=your_places_api_key   # Places API must be enabled
+  PORT=5000
+  ```
+  Then run it:
+  ```bash
+  cd backend
+  npm install
+  npm run dev
   ```
 
-  ### 4. Run the App
+  ### 4. Configure the app
+  Create a `.env` file in the project root:
+  ```env
+  EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+  # URL of the backend. On a physical phone use your computer's LAN IP,
+  # e.g. http://192.168.1.20:5000 — "localhost" only works on the iOS simulator
+  # and the Android emulator falls back to http://10.0.2.2:5000.
+  EXPO_PUBLIC_API_URL=http://192.168.1.20:5000
+  ```
+
+  ### 5. Run the App
   ```bash
   npx expo start
   ```

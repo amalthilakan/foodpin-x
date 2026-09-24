@@ -43,7 +43,7 @@ export default function Signup() {
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(email.trim())) {
             showModal('error', 'Error', 'Please enter a valid email address');
             return;
         }
@@ -55,7 +55,7 @@ export default function Signup() {
 
         setLoading(true);
         try {
-            await axios.post('/auth/signup', { username, email, password, confirmPassword });
+            await axios.post('/auth/signup', { username: username.trim(), email: email.trim(), password, confirmPassword });
             showModal('success', 'Success', 'Account created successfully! Please login.');
         } catch (error: any) {
             console.error('Signup Error:', error);

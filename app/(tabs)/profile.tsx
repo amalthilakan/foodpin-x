@@ -11,10 +11,10 @@ import { Button } from '../../src/components/Button';
 import { SHADOWS, SPACING } from '../../src/constants/theme';
 import { useTheme } from '../../src/context/ThemeContext';
 import { getAuthHeaders } from '../../src/utils/auth';
-import { resetWelcomeToast } from './home';
+import { resetWelcomeToast } from '../../src/utils/welcomeToast';
 
 export default function Profile() {
-    const { colors, theme, toggleTheme } = useTheme();
+    const { colors } = useTheme();
     const [user, setUser] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [successVisible, setSuccessVisible] = useState(false);

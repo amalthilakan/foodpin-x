@@ -4,18 +4,14 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useCallback, useState } from 'react';
 import { Alert, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeInRight, FadeInUp, FadeOutUp, Layout } from 'react-native-reanimated';
+import Animated, { FadeInRight, FadeInUp, FadeOutUp, LinearTransition } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
 import { SHADOWS, SPACING } from '../../src/constants/theme';
 import { useTheme } from '../../src/context/ThemeContext';
 import { getAuthHeaders } from '../../src/utils/auth';
-
-let hasShownWelcome = false;
-
-export const resetWelcomeToast = () => {
-    hasShownWelcome = false;
-};
+import { normalizeUrl } from '../../src/utils/links';
+import { shouldShowWelcomeToast } from '../../src/utils/welcomeToast';
 
 export default function Home() {
     const { colors, theme } = useTheme();
@@ -31,6 +27,31 @@ export default function Home() {
 
     const router = useRouter();
 
+    const checkUser = useCallback(async () => {
+        const token = await SecureStore.getItemAsync('token');
+        const userData = await SecureStore.getItemAsync('user');
+        if (!token || !userData) {
+            router.replace('/');
+            return false;
+        }
+        setUser(JSON.parse(userData));
+        if (shouldShowWelcomeToast()) {
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
+        }
+        return true;
+    }, [router]);
+
+    const fetchBookmarks = useCallback(async () => {
+        try {
+            const headers = await getAuthHeaders();
+            const response = await axios.get('/bookmarks', headers);
+            setBookmarks(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    }, []);
+
     useFocusEffect(
         useCallback(() => {
             const init = async () => {
@@ -40,41 +61,15 @@ export default function Home() {
                 }
             };
             init();
-        }, [])
+        }, [checkUser, fetchBookmarks])
     );
-
-    const checkUser = async () => {
-        const userData = await SecureStore.getItemAsync('user');
-        if (!userData) {
-            router.replace('/');
-            return false;
-        } else {
-            setUser(JSON.parse(userData));
-            if (!hasShownWelcome) {
-                setShowToast(true);
-                hasShownWelcome = true;
-                setTimeout(() => setShowToast(false), 3000);
-            }
-            return true;
-        }
-    };
-
-    const fetchBookmarks = async () => {
-        try {
-            const headers = await getAuthHeaders();
-            const response = await axios.get('/bookmarks', headers);
-            setBookmarks(response.data);
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     const handleDelete = async (id: string) => {
         try {
             const headers = await getAuthHeaders();
             await axios.delete(`/bookmarks/${id}`, headers);
             setBookmarks((prev) => prev.filter((b) => b._id !== id));
-        } catch (error) {
+        } catch {
             Alert.alert('Error', 'Failed to delete bookmark');
         }
     };
@@ -90,7 +85,7 @@ export default function Home() {
         if (!editingItem) return;
 
         try {
-            const updatedData = { notes: editNotes, socialLink: editSocialLink };
+            const updatedData = { notes: editNotes.trim(), socialLink: normalizeUrl(editSocialLink) };
             const headers = await getAuthHeaders();
             await axios.put(`/bookmarks/${editingItem._id}`, updatedData, headers);
 
@@ -101,7 +96,7 @@ export default function Home() {
             setModalVisible(false);
             setEditingItem(null);
             Alert.alert('Success', 'Bookmark updated successfully');
-        } catch (error) {
+        } catch {
             Alert.alert('Error', 'Failed to update bookmark');
         }
     };
@@ -109,7 +104,7 @@ export default function Home() {
     const renderItem = ({ item, index }: { item: any, index: number }) => (
         <Animated.View
             entering={FadeInRight.delay(index * 100).springify()}
-            layout={Layout.springify()}
+            layout={LinearTransition.springify()}
             style={[styles.card, { backgroundColor: colors.surface }]}
         >
             <TouchableOpacity
@@ -120,17 +115,17 @@ export default function Home() {
                         id: item._id,
                         name: item.name,
                         address: item.address,
-                        rating: item.rating,
+                        rating: item.rating ?? '',
                         latitude: item.location.latitude,
                         longitude: item.location.longitude,
-                        notes: item.notes,
-                        socialLink: item.socialLink
+                        notes: item.notes ?? '',
+                        socialLink: item.socialLink ?? ''
                     }
                 })}
             >
                 <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{item.name}</Text>
                 <Text style={[styles.cardAddress, { color: colors.textSecondary }]}>{item.address}</Text>
-                {item.rating && (
+                {item.rating != null && (
                     <View style={styles.ratingContainer}>
                         <FontAwesome name="star" size={14} color="#f57f17" />
                         <Text style={styles.ratingText}>{item.rating}</Text>

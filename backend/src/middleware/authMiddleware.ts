@@ -6,20 +6,20 @@ interface AuthRequest extends Request {
 }
 
 export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {
-    let token;
-
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            token = req.headers.authorization.split(' ')[1];
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-            req.user = decoded;
-            next();
-        } catch (error) {
-            res.status(401).json({ message: 'Not authorized, token failed' });
-        }
-    }
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : undefined;
 
     if (!token) {
         res.status(401).json({ message: 'Not authorized, no token' });
+        return;
     }
+
+    try {
+        req.user = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    } catch (error) {
+        res.status(401).json({ message: 'Not authorized, token failed' });
+        return;
+    }
+
+    next();
 };

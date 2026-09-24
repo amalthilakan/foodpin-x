@@ -2,11 +2,12 @@ import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Linking, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SHADOWS, SPACING } from '../../src/constants/theme';
 import { useTheme } from '../../src/context/ThemeContext';
 import { getAuthHeaders } from '../../src/utils/auth';
+import { normalizeUrl, openDirections } from '../../src/utils/links';
 
 export default function RestaurantDetails() {
     const { colors } = useTheme();
@@ -29,36 +30,29 @@ export default function RestaurantDetails() {
     }, [successVisible]);
 
     const handleGetDirections = () => {
-        const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
-        const latLng = `${latitude},${longitude}`;
-        const label = name as string;
-        const url = Platform.select({
-            ios: `${scheme}${label}@${latLng}`,
-            android: `${scheme}${latLng}(${label})`
+        openDirections(latitude as string, longitude as string, name as string).catch(() => {
+            Alert.alert('Error', 'Could not open maps');
         });
-
-        if (url) {
-            Linking.openURL(url).catch(() => {
-                const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-                Linking.openURL(webUrl);
-            });
-        }
     };
 
     const handleSave = async () => {
         try {
             const headers = await getAuthHeaders();
-            await axios.put(`/bookmarks/${id}`, { notes, socialLink }, headers);
+            const trimmedNotes = notes.trim();
+            const normalizedLink = normalizeUrl(socialLink);
+            await axios.put(`/bookmarks/${id}`, { notes: trimmedNotes, socialLink: normalizedLink }, headers);
+            setNotes(trimmedNotes);
+            setSocialLink(normalizedLink);
             setIsEditing(false);
             setSuccessVisible(true);
-        } catch (error) {
+        } catch {
             Alert.alert('Error', 'Failed to save details');
         }
     };
 
     const handleOpenSocialLink = () => {
         if (socialLink) {
-            Linking.openURL(socialLink).catch(() => {
+            Linking.openURL(normalizeUrl(socialLink)).catch(() => {
                 Alert.alert('Error', 'Could not open link');
             });
         }
@@ -81,7 +75,7 @@ export default function RestaurantDetails() {
                     <Text style={[styles.title, { color: colors.textPrimary }]}>{name}</Text>
                     <Text style={[styles.address, { color: colors.textSecondary }]}>{address}</Text>
 
-                    {rating && (
+                    {!!rating && rating !== 'undefined' && (
                         <View style={styles.ratingContainer}>
                             <FontAwesome name="star" size={18} color="#f57f17" />
                             <Text style={styles.ratingText}>{rating}</Text>

@@ -1,9 +1,9 @@
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as Location from 'expo-location';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import debounce from 'lodash.debounce';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Dimensions, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,21 +37,59 @@ interface PlaceSuggestion {
 export default function Search() {
     const { colors } = useTheme();
     const mapRef = useRef<MapView>(null);
-    const [region, setRegion] = useState<Region | null>(null);
+    // The map is uncontrolled; this tracks where it currently is so searches
+    // use the visible area and re-renders don't snap the map back.
+    const regionRef = useRef<Region | null>(null);
+    const isLocatingRef = useRef(false);
+    const searchRequestId = useRef(0);
     const [places, setPlaces] = useState<PlaceDetails[]>([]);
     const [search, setSearch] = useState('');
     const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+    const [searchError, setSearchError] = useState('');
     const [selectedPlace, setSelectedPlace] = useState<PlaceDetails | null>(null);
     const [exploreMode, setExploreMode] = useState(false);
-    const [bookmarks, setBookmarks] = useState<PlaceDetails[]>([]);
     const [isLocating, setIsLocating] = useState(false);
     const [successVisible, setSuccessVisible] = useState(false);
-    const router = useRouter();
     const insets = useSafeAreaInsets();
+
+    const moveTo = (newRegion: Region, duration: number) => {
+        regionRef.current = newRegion;
+        mapRef.current?.animateToRegion(newRegion, duration);
+    };
+
+    const getCurrentLocation = useCallback(async () => {
+        if (isLocatingRef.current) return;
+        try {
+            isLocatingRef.current = true;
+            setIsLocating(true);
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Location permission is required to search nearby restaurants');
+                return;
+            }
+
+            const location = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.Balanced,
+            });
+
+            moveTo({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+            }, 300);
+        } catch (error) {
+            console.error('Error getting location:', error);
+            Alert.alert('Error', 'Failed to get current location');
+        } finally {
+            isLocatingRef.current = false;
+            setIsLocating(false);
+        }
+    }, []);
 
     useEffect(() => {
         getCurrentLocation();
-    }, []);
+    }, [getCurrentLocation]);
 
     useEffect(() => {
         if (successVisible) {
@@ -62,46 +100,7 @@ export default function Search() {
         }
     }, [successVisible]);
 
-    useFocusEffect(
-        useCallback(() => {
-            if (exploreMode) {
-                fetchBookmarks();
-            }
-        }, [exploreMode])
-    );
-
-    const getCurrentLocation = async () => {
-        if (isLocating) return;
-        try {
-            setIsLocating(true);
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permission Denied', 'Location permission is required');
-                return;
-            }
-
-            const location = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Balanced,
-            });
-
-            const newRegion = {
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.05,
-            };
-
-            setRegion(newRegion);
-            mapRef.current?.animateToRegion(newRegion, 300);
-        } catch (error) {
-            console.error('Error getting location:', error);
-            Alert.alert('Error', 'Failed to get current location');
-        } finally {
-            setIsLocating(false);
-        }
-    };
-
-    const fetchBookmarks = async () => {
+    const fetchBookmarks = useCallback(async () => {
         try {
             const headers = await getAuthHeaders();
             const response = await axios.get('/bookmarks', headers);
@@ -118,33 +117,45 @@ export default function Search() {
                 rating: b.rating,
                 vicinity: b.address,
             }));
-            setBookmarks(formatted);
-            if (exploreMode) {
-                setPlaces(formatted);
+            setPlaces(formatted);
+            if (formatted.length > 0) {
+                mapRef.current?.fitToCoordinates(
+                    formatted.map((p: PlaceDetails) => ({ latitude: p.geometry.location.lat, longitude: p.geometry.location.lng })),
+                    { edgePadding: { top: 120, right: 60, bottom: 160, left: 60 }, animated: true }
+                );
             }
         } catch (error) {
             console.error('Error fetching bookmarks:', error);
         }
-    };
+    }, []);
+
+    // Refresh bookmark markers whenever explore mode is on and the tab gains focus
+    useFocusEffect(
+        useCallback(() => {
+            if (exploreMode) {
+                fetchBookmarks();
+            }
+        }, [exploreMode, fetchBookmarks])
+    );
 
     const toggleExploreMode = () => {
-        setExploreMode((prev) => {
-            const newMode = !prev;
-            if (newMode) {
-                fetchBookmarks();
-            } else {
-                setPlaces([]);
-                setSelectedPlace(null);
-                setSearch('');
-                setSuggestions([]);
-            }
-            return newMode;
-        });
+        setPlaces([]);
+        setSelectedPlace(null);
+        setSearch('');
+        setSuggestions([]);
+        setSearchError('');
+        setExploreMode((prev) => !prev);
     };
 
-    const debouncedFetchSuggestions = useCallback(
-        debounce(async (input: string) => {
-            if (!region || !input) return;
+    const debouncedFetchSuggestions = useMemo(
+        () => debounce(async (input: string) => {
+            const region = regionRef.current;
+            if (!input) return;
+            if (!region) {
+                setSearchError('Waiting for your location. Tap the location button and try again.');
+                return;
+            }
+            const requestId = ++searchRequestId.current;
             try {
                 const headers = await getAuthHeaders();
                 const response = await axios.get('/places/search', {
@@ -156,8 +167,10 @@ export default function Search() {
                     },
                     ...headers
                 });
+                // Ignore responses for queries the user has already typed past
+                if (requestId !== searchRequestId.current) return;
 
-                const results = response.data.results.map((item: any) => ({
+                const results = (response.data.results || []).map((item: any) => ({
                     place_id: item.place_id,
                     description: item.name, // Use name for display
                     vicinity: item.vicinity, // Store address
@@ -165,21 +178,30 @@ export default function Search() {
                     rating: item.rating,
                 }));
 
-                setSuggestions(results || []);
-            } catch (error) {
+                setSuggestions(results);
+                setSearchError(results.length === 0 ? 'No restaurants found nearby' : '');
+            } catch (error: any) {
+                if (requestId !== searchRequestId.current) return;
                 console.error('Nearby search error:', error);
+                setSuggestions([]);
+                setSearchError(error.response?.data?.message || 'Search failed. Please try again.');
             }
         }, 500),
-        [region]
+        []
     );
 
+    useEffect(() => () => debouncedFetchSuggestions.cancel(), [debouncedFetchSuggestions]);
+
     useEffect(() => {
-        if (search.length > 1 && !exploreMode) {
-            debouncedFetchSuggestions(search);
+        if (search.trim().length > 1 && !exploreMode) {
+            debouncedFetchSuggestions(search.trim());
         } else {
+            debouncedFetchSuggestions.cancel();
+            searchRequestId.current++;
             setSuggestions([]);
+            setSearchError('');
         }
-    }, [search, exploreMode]);
+    }, [search, exploreMode, debouncedFetchSuggestions]);
 
     const fetchPlaceDetails = async (placeId: string): Promise<PlaceDetails | null> => {
         // For nearbysearch results, we already have the geometry in suggestions
@@ -226,14 +248,12 @@ export default function Search() {
             setSuggestions([]);
             setSearch(''); // Clear search input
 
-            const newRegion = {
+            moveTo({
                 latitude: details.geometry.location.lat,
                 longitude: details.geometry.location.lng,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
-            };
-            setRegion(newRegion);
-            mapRef.current?.animateToRegion(newRegion, 500);
+            }, 500);
         }
     };
 
@@ -241,10 +261,18 @@ export default function Search() {
         <View style={styles.container}>
             <MapView
                 style={styles.map}
-                region={region || undefined}
                 showsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
+                onMapReady={() => {
+                    // Location may have resolved before the map was ready to animate
+                    if (regionRef.current) {
+                        mapRef.current?.animateToRegion(regionRef.current, 0);
+                    }
+                }}
+                onRegionChangeComplete={(newRegion) => {
+                    regionRef.current = newRegion;
+                }}
             >
                 {places.map((place) => (
                     <Marker
@@ -259,6 +287,18 @@ export default function Search() {
                         onPress={() => setSelectedPlace(place)}
                     />
                 ))}
+                {!exploreMode && selectedPlace && (
+                    <Marker
+                        key={`selected-${selectedPlace.place_id}`}
+                        coordinate={{
+                            latitude: selectedPlace.geometry.location.lat,
+                            longitude: selectedPlace.geometry.location.lng,
+                        }}
+                        title={selectedPlace.name}
+                        description={selectedPlace.vicinity}
+                        pinColor={colors.error}
+                    />
+                )}
             </MapView>
 
             <TouchableOpacity
@@ -291,6 +331,11 @@ export default function Search() {
                             placeholderTextColor={colors.placeholder}
                         />
                     </View>
+                    {suggestions.length === 0 && !!searchError && (
+                        <View style={[styles.suggestionsContainer, { top: insets.top + 120, backgroundColor: colors.surface }]}>
+                            <Text style={[styles.suggestionItem, { color: colors.textSecondary }]}>{searchError}</Text>
+                        </View>
+                    )}
                     {suggestions.length > 0 && (
                         <View style={[styles.suggestionsContainer, { top: insets.top + 120, backgroundColor: colors.surface }]}>
                             <FlatList
@@ -317,7 +362,7 @@ export default function Search() {
                     <View style={[styles.saveBox, { backgroundColor: colors.surface }]}>
                         <Text style={[styles.saveBoxTitle, { color: colors.textPrimary }]}>{selectedPlace.name}</Text>
                         <Text style={[styles.saveBoxText, { color: colors.textSecondary }]}>{selectedPlace.formatted_address}</Text>
-                        {selectedPlace.rating && (
+                        {selectedPlace.rating != null && (
                             <Text style={[styles.saveBoxText, { color: colors.textSecondary }]}>Rating: {selectedPlace.rating} ⭐</Text>
                         )}
 

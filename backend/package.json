@@ -2,7 +2,7 @@
     "name": "foodpin-backend",
     "version": "1.0.0",
     "description": "Backend for FoodPin app",
-    "main": "server.js",
+    "main": "dist/server.js",
     "scripts": {
         "start": "node dist/server.js",
         "dev": "nodemon src/server.ts",
