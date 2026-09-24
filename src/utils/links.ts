@@ -11,7 +11,7 @@ export const normalizeUrl = (url: string) => {
 export const openDirections = async (latitude: string | number, longitude: string | number, label: string) => {
     const latLng = `${latitude},${longitude}`;
     const encodedLabel = encodeURIComponent(label || '');
-    const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${latLng}`;
+    const webUrl = `https://www.openstreetmap.org/directions?route=%3B${latitude}%2C${longitude}`;
     const nativeUrl = Platform.select({
         ios: `maps:0,0?q=${encodedLabel}@${latLng}`,
         android: `geo:0,0?q=${latLng}(${encodedLabel})`,

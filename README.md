@@ -41,7 +41,7 @@
 | Feature | Description |
 | :--- | :--- |
 | **🔐 Authentication** | Secure Login and Signup with JWT and secure storage. |
-| **🗺️ Interactive Maps** | Explore restaurants visually using Google Maps integration. |
+| **🗺️ Interactive Maps** | Explore restaurants on a free OpenStreetMap map (Leaflet) — no API key needed. |
 | **🔍 Smart Search** | Real-time search by restaurant name or cuisine type. |
 | **👤 User Profiles** | Personalized profile management and saved places. |
 | **🌗 Dark/Light Mode** | Automatic theme switching based on system preferences. |
@@ -93,7 +93,6 @@
   ```env
   MONGO_URI=mongodb+srv://<user>:<password>@<cluster>/foodpin
   JWT_SECRET=a_long_random_string
-  GOOGLE_MAPS_API_KEY=your_places_api_key   # Places API must be enabled
   PORT=5000
   ```
   Then run it:
@@ -106,12 +105,14 @@
   ### 4. Configure the app
   Create a `.env` file in the project root:
   ```env
-  EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
   # URL of the backend. On a physical phone use your computer's LAN IP,
   # e.g. http://192.168.1.20:5000 — "localhost" only works on the iOS simulator
   # and the Android emulator falls back to http://10.0.2.2:5000.
   EXPO_PUBLIC_API_URL=http://192.168.1.20:5000
   ```
+
+  No map API keys are needed: the map is Leaflet with OpenStreetMap tiles, and
+  restaurant search uses OpenStreetMap's free Overpass API.
 
   ### 5. Run the App
   ```bash

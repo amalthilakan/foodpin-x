@@ -5,7 +5,7 @@ import { useFocusEffect } from 'expo-router';
 import debounce from 'lodash.debounce';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Dimensions, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker, Region } from '../../src/components/Map';
+import LeafletMap, { LatLng, LeafletMapHandle, MapMarker, Region } from '../../src/components/LeafletMap';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SHADOWS, SPACING } from '../../src/constants/theme';
 import { useTheme } from '../../src/context/ThemeContext';
@@ -36,7 +36,7 @@ interface PlaceSuggestion {
 
 export default function Search() {
     const { colors } = useTheme();
-    const mapRef = useRef<MapView>(null);
+    const mapRef = useRef<LeafletMapHandle>(null);
     // The map is uncontrolled; this tracks where it currently is so searches
     // use the visible area and re-renders don't snap the map back.
     const regionRef = useRef<Region | null>(null);
@@ -49,6 +49,7 @@ export default function Search() {
     const [selectedPlace, setSelectedPlace] = useState<PlaceDetails | null>(null);
     const [exploreMode, setExploreMode] = useState(false);
     const [isLocating, setIsLocating] = useState(false);
+    const [userLocation, setUserLocation] = useState<LatLng | null>(null);
     const [successVisible, setSuccessVisible] = useState(false);
     const insets = useSafeAreaInsets();
 
@@ -72,6 +73,7 @@ export default function Search() {
                 accuracy: Location.Accuracy.Balanced,
             });
 
+            setUserLocation({ latitude: location.coords.latitude, longitude: location.coords.longitude });
             moveTo({
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
@@ -121,7 +123,7 @@ export default function Search() {
             if (formatted.length > 0) {
                 mapRef.current?.fitToCoordinates(
                     formatted.map((p: PlaceDetails) => ({ latitude: p.geometry.location.lat, longitude: p.geometry.location.lng })),
-                    { edgePadding: { top: 120, right: 60, bottom: 160, left: 60 }, animated: true }
+                    { edgePadding: { top: 120, right: 60, bottom: 160, left: 60 } }
                 );
             }
         } catch (error) {
@@ -257,49 +259,37 @@ export default function Search() {
         }
     };
 
+    const markers = useMemo<MapMarker[]>(() => {
+        const toMarker = (place: PlaceDetails, color: string): MapMarker => ({
+            id: place.place_id,
+            latitude: place.geometry.location.lat,
+            longitude: place.geometry.location.lng,
+            title: place.name,
+            description: place.vicinity,
+            color,
+        });
+        const result = places.map((place) => toMarker(place, exploreMode ? colors.primary : colors.error));
+        if (!exploreMode && selectedPlace) {
+            result.push(toMarker(selectedPlace, colors.error));
+        }
+        return result;
+    }, [places, selectedPlace, exploreMode, colors.primary, colors.error]);
+
     return (
         <View style={styles.container}>
-            <MapView
-                style={styles.map}
-                showsUserLocation
-                showsMyLocationButton={false}
+            <LeafletMap
                 ref={mapRef}
-                onMapReady={() => {
-                    // Location may have resolved before the map was ready to animate
-                    if (regionRef.current) {
-                        mapRef.current?.animateToRegion(regionRef.current, 0);
-                    }
-                }}
+                style={styles.map}
+                markers={markers}
+                userLocation={userLocation}
                 onRegionChangeComplete={(newRegion) => {
                     regionRef.current = newRegion;
                 }}
-            >
-                {places.map((place) => (
-                    <Marker
-                        key={`${place.place_id}-${place.geometry.location.lat}`}
-                        coordinate={{
-                            latitude: place.geometry.location.lat,
-                            longitude: place.geometry.location.lng,
-                        }}
-                        title={place.name}
-                        description={place.vicinity}
-                        pinColor={exploreMode ? colors.primary : colors.error}
-                        onPress={() => setSelectedPlace(place)}
-                    />
-                ))}
-                {!exploreMode && selectedPlace && (
-                    <Marker
-                        key={`selected-${selectedPlace.place_id}`}
-                        coordinate={{
-                            latitude: selectedPlace.geometry.location.lat,
-                            longitude: selectedPlace.geometry.location.lng,
-                        }}
-                        title={selectedPlace.name}
-                        description={selectedPlace.vicinity}
-                        pinColor={colors.error}
-                    />
-                )}
-            </MapView>
+                onMarkerPress={(id) => {
+                    const place = places.find((p) => p.place_id === id);
+                    if (place) setSelectedPlace(place);
+                }}
+            />
 
             <TouchableOpacity
                 style={[styles.exploreButton, { backgroundColor: colors.surface }]}
