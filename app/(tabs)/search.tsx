@@ -46,6 +46,7 @@ export default function Search() {
     const [search, setSearch] = useState('');
     const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
     const [searchError, setSearchError] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
     const [selectedPlace, setSelectedPlace] = useState<PlaceDetails | null>(null);
     const [exploreMode, setExploreMode] = useState(false);
     const [isLocating, setIsLocating] = useState(false);
@@ -158,6 +159,7 @@ export default function Search() {
                 return;
             }
             const requestId = ++searchRequestId.current;
+            setIsSearching(true);
             try {
                 const headers = await getAuthHeaders();
                 const response = await axios.get('/places/search', {
@@ -167,6 +169,8 @@ export default function Search() {
                         longitude: region.longitude,
                         radius: 5000
                     },
+                    // The first search in a new area waits on OpenStreetMap, which can be slow
+                    timeout: 45000,
                     ...headers
                 });
                 // Ignore responses for queries the user has already typed past
@@ -187,6 +191,8 @@ export default function Search() {
                 console.error('Nearby search error:', error);
                 setSuggestions([]);
                 setSearchError(error.response?.data?.message || 'Search failed. Please try again.');
+            } finally {
+                if (requestId === searchRequestId.current) setIsSearching(false);
             }
         }, 500),
         []
@@ -200,6 +206,7 @@ export default function Search() {
         } else {
             debouncedFetchSuggestions.cancel();
             searchRequestId.current++;
+            setIsSearching(false);
             setSuggestions([]);
             setSearchError('');
         }
@@ -321,9 +328,11 @@ export default function Search() {
                             placeholderTextColor={colors.placeholder}
                         />
                     </View>
-                    {suggestions.length === 0 && !!searchError && (
+                    {suggestions.length === 0 && (isSearching || !!searchError) && (
                         <View style={[styles.suggestionsContainer, { top: insets.top + 120, backgroundColor: colors.surface }]}>
-                            <Text style={[styles.suggestionItem, { color: colors.textSecondary }]}>{searchError}</Text>
+                            <Text style={[styles.suggestionItem, { color: colors.textSecondary }]}>
+                                {isSearching ? 'Searching nearby restaurants…' : searchError}
+                            </Text>
                         </View>
                     )}
                     {suggestions.length > 0 && (
